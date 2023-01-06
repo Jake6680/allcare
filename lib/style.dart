@@ -12,6 +12,6 @@ var theme = ThemeData(
   ),
 );
 
-var barText = TextStyle(color:Color(0xffffffff));
+var barText = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500);
 
-var normalText = TextStyle( fontSize: 20, fontWeight: FontWeight.w600 );
+var normalText = TextStyle(color:Color(0xffffffff), fontSize: 20, fontWeight: FontWeight.w600 );
