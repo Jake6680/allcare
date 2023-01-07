@@ -29,7 +29,6 @@ initNotification() async {
 }
 
 showNotification() async {
-
   var androidDetails = AndroidNotificationDetails(
     '유니크한 알림 채널 ID',
     '알림종류 설명',
@@ -37,13 +36,11 @@ showNotification() async {
     importance: Importance.max,
     color: Color.fromARGB(255, 11, 1, 162),
   );
-
   var iosDetails = IOSNotificationDetails(
     presentAlert: true,
     presentBadge: true,
     presentSound: true,
   );
-
   // 알림 id, 제목, 내용 맘대로 채우기
   notifications.show(
       1,

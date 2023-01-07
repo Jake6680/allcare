@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "525008174022",
+    "project_id": "allcare-55fc4",
+    "storage_bucket": "allcare-55fc4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:525008174022:android:4321847ab482982d8810c7",
+        "android_client_info": {
+          "package_name": "com.allcare.allcareapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "525008174022-3bnon5dr8q0eu469v86qe1pjd2k5oijs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtaGvkiXxZu4QjSLVMFiSLD0x2_XJuP84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "525008174022-3bnon5dr8q0eu469v86qe1pjd2k5oijs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
