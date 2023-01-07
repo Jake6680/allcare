@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import './style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:animated_overflow/animated_overflow.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'notification.dart';
+
+import './style.dart' as style;
+import './pages/letter.dart';
+import './pages/notice.dart';
+
+
 
 void main() {
   runApp(
@@ -35,27 +39,14 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       floatingActionButton:
-      // Container(
-          // decoration: BoxDecoration(
-          //   border: Border.all(
-          //     color: Colors.teal,
-          //     width: 3,
-          //   ),
-          //   borderRadius: BorderRadius.all(
-          //   Radius.circular(30)
-          //   ),
-          // ),
-          // child:
         FloatingActionButton.extended(
           onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI() ));},
-          label: Text('익명 편지', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),),
-          icon: Icon(Icons.mail, color: Colors.white, size: 30,),
+          label: Text('익명 편지', style: style.floatingText),
+          icon: Icon(Icons.mail, color: Colors.white, size: 30),
           backgroundColor: Color(0xff0B01A2),
-
         ),
-      // ),
-
 
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(60),
@@ -66,6 +57,7 @@ class _MyAppState extends State<MyApp> {
                 Text('올케어 관리형 독학관'),
               ],
             ),
+
             actions: [
               Column(children: [
                 Text('김OO',style: style.barText),
@@ -74,15 +66,15 @@ class _MyAppState extends State<MyApp> {
               Stack(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.notifications, size: 35,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => noticeUI() ));}
+                    icon: Icon(Icons.notifications, size: 33,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => noticeUI() ));}
                   ),
                   alertIconUI()
                 ],
               ),
             ],
+
           ),
         ),
-
 
         body: Container(
           padding: EdgeInsets.fromLTRB(30, 10, 30, 30),
@@ -107,87 +99,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-//#################################################################################################
-
-class noticeUI extends StatelessWidget {
-  const noticeUI({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('공지함', style: style.normalText),
-      ),
-    );
-  }
-}
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class letterUI extends StatefulWidget {
-  letterUI({Key? key}) : super(key: key);
-
-  @override
-  State<letterUI> createState() => _letterUIState();
-}
-
-class _letterUIState extends State<letterUI> {
-  var letterData = TextEditingController();
-
-  setUserContent(text) async{
-    var content = await SharedPreferences.getInstance();
-    content.setString('letterContent', text);
-  }
-
-  getUserContent() async{
-    var content = await SharedPreferences.getInstance();
-    var letterContented = content.getString('letterContent');
-    if (letterContented != null) {
-      setState(() {
-        letterData.text = letterContented;
-      });
-    }
-  }
-
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      getUserContent();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: (){ showDialog(context: context, builder: (context) => sendDialog(letterData : letterData.text) );},
-          label: Text('보내기', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),),
-          icon: Icon(Icons.outgoing_mail, color: Colors.white, size: 30,),
-          backgroundColor: Color(0xff0B01A2),
-        ),
-
-      appBar: AppBar(centerTitle: true, title: Text('익명 편지쓰기')),
-      body:SizedBox(
-        height: double.infinity,
-        child: TextField(
-          onChanged: (text){ setUserContent(text); },
-          controller: letterData,
-          maxLines: 35,
-          minLines: 1,
-          style: TextStyle( fontSize: 18, fontWeight: FontWeight.w400 ),
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(15),
-            border: InputBorder.none,
-            hintText: '내용',
-          ),
-        ),
-      )
-    );
-  }
-}
 
 class noticeAlert extends StatelessWidget {
   const noticeAlert({Key? key}) : super(key: key);
@@ -200,8 +115,8 @@ class noticeAlert extends StatelessWidget {
         margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          border: Border.all(
-            width: 3,
+            border: Border.all(
+            width: 2,
             color: Color(0xffff0000)
           ),
             borderRadius: BorderRadius.circular(15),
@@ -214,9 +129,10 @@ class noticeAlert extends StatelessWidget {
               animatedOverflowDirection: AnimatedOverflowDirection.HORIZONTAL,
               maxWidth: _width / 1.5,
               padding: 0,
-              speed: 50.0,
-              child: Text("긴급공지 쓰는곳... on/off 설정 가능! 일껄요?",
-                style: const TextStyle(color: Colors.red, fontSize: 15, fontWeight: FontWeight.bold),
+              speed: 70.0,
+              child: Text(
+                "긴급공지 쓰는곳... on/off 설정 가능!",
+                style: style.speakerText,
                 maxLines: 1,
                 overflow: TextOverflow.visible,
               ),
@@ -228,100 +144,6 @@ class noticeAlert extends StatelessWidget {
   }
 }
 
-
-//####################################################################################################
-
-
-class sendDialog extends StatelessWidget {
-  sendDialog({Key? key, this.letterData}) : super(key: key);
-
-  final letterData;
-
-  @override
-  Widget build(BuildContext context) {
-      return SizedBox(
-          child: ((){if (letterData == '') {
-              return cancelLetter();
-            }else{
-              return checkLetter();
-          }
-          })(),
-      );
-  }
-}
-
-
-class cancelLetter extends StatelessWidget {
-  const cancelLetter({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('내용을 입력해주세요.', style: TextStyle( fontSize: 20, fontWeight: FontWeight.w600),),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20))
-      ),
-      actions: [
-        ElevatedButton(
-          onPressed: (){Navigator.pop(context);},
-          style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),),
-          child: Text('닫기', style: style.normalText),
-        )
-      ],
-    );
-  }
-}
-
-
-class checkLetter extends StatelessWidget {
-  const checkLetter({Key? key}) : super(key: key);
-
-  removeUserContent() async {
-    var content = await SharedPreferences.getInstance();
-    content.remove('letterContent');
-  }
-
-  void showSnackBar(BuildContext context) {
-    final snackBar = SnackBar(
-      content: Text('성공', textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.w600),),
-      backgroundColor: Colors.black,
-      behavior: SnackBarBehavior.floating,
-      shape: StadiumBorder(),
-      width: 100,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('원장님에게만 익명으로 보내드립니다.',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20))
-      ),
-      actions: [
-        ElevatedButton(onPressed: () {
-          removeUserContent();
-          showSnackBar(context);
-          Navigator.popUntil(context, ModalRoute.withName("/"));
-        },
-            style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20))),),
-            child: Text('보내기',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600))),
-        ElevatedButton(onPressed: () {
-          Navigator.pop(context);
-        },
-            style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20))),),
-            child: Text('취소',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)))
-      ],
-    );
-  }
-}
 
 class alertIconUI extends StatelessWidget {
   const alertIconUI({Key? key}) : super(key: key);
@@ -343,10 +165,7 @@ class alertIconUI extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(0.0),
             child: Center(
-              child: Text(
-                'N',
-                style: TextStyle(fontSize: 10,fontWeight: FontWeight.w600),
-              ),
+              child: Text('N', style: style.noticeIconText,),
             ),
           )
       ),
