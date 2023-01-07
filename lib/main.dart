@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import './style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:animated_overflow/animated_overflow.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'notification.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:allcare/firebase_options.dart';
 
+import './pages/login.dart';
 import './style.dart' as style;
 import './pages/letter.dart';
 import './pages/notice.dart';
@@ -23,7 +22,11 @@ void main() async{
   runApp(
       MaterialApp(
         theme: style.theme,
-        home: MyApp()
+        initialRoute: '/',
+        routes: {
+          '/': (context) => loginUI(),
+          '/home': (context) => MyApp(),
+        },
       )
   );
 }
@@ -39,6 +42,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'Daily Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
 
+
   @override
   void initState() {
     super.initState();
@@ -47,62 +51,65 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: (){return Future(() => true);},
+      child: Scaffold(
+        floatingActionButton:
+        FloatingActionButton.extended(
+          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI() ));},
+          label: Text('익명 편지', style: style.floatingText),
+          icon: Icon(Icons.mail, color: Colors.white, size: 30),
+          backgroundColor: Color(0xff0B01A2),
+        ),
 
-      floatingActionButton:
-      FloatingActionButton.extended(
-        onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI() ));},
-        label: Text('익명 편지', style: style.floatingText),
-        icon: Icon(Icons.mail, color: Colors.white, size: 30),
-        backgroundColor: Color(0xff0B01A2),
-      ),
-
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60),
-        child: AppBar(
-          title: Row(
-            children: [
-              Image.asset('assets/Logo.png', width: 80),
-              Text('올케어 관리형 독학관'),
-            ],
-          ),
-
-          actions: [
-            Column(children: [
-              Text('김OO',style: style.barText),
-              Text('수능',style: style.barText),
-            ],),
-            Stack(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60),
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            title: Row(
               children: [
-                IconButton(
-                    icon: Icon(Icons.notifications, size: 33,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => noticeUI() ));}
-                ),
-                alertIconUI()
+                Image.asset('assets/Logo.png', width: 80),
+                Text('올케어 관리형 독학관'),
               ],
             ),
-          ],
 
-        ),
-      ),
-
-      body: Container(
-        padding: EdgeInsets.fromLTRB(30, 10, 30, 30),
-        color: Color(0xffefefef),
-        child: ListView.builder(
-            itemCount: buttonName.length + 1,
-            itemBuilder: (c, i){
-              if (i == 0) return noticeAlert();
-              return ListTile(
-                title: Container(
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
-                  height: 57,
-                  child: ElevatedButton(
-                    onPressed: (){},
-                    child: Text(buttonName[i - 1], style: style.normalText,),
+            actions: [
+              Column(children: [
+                Text('김OO',style: style.barText),
+                Text('수능',style: style.barText),
+              ],),
+              Stack(
+                children: [
+                  IconButton(
+                      icon: Icon(Icons.notifications, size: 33,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => noticeUI() ));}
                   ),
-                ),
-              );
-            }
+                  alertIconUI()
+                ],
+              ),
+            ],
+
+          ),
+        ),
+
+        body: Container(
+          padding: EdgeInsets.fromLTRB(30, 10, 30, 30),
+          color: Color(0xffefefef),
+          child: ListView.builder(
+              itemCount: buttonName.length + 1,
+              itemBuilder: (c, i){
+                if (i == 0) return noticeAlert();
+                return ListTile(
+                  title: Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
+                    height: 57,
+                    child: ElevatedButton(
+                      onPressed: (){},
+                      child: Text(buttonName[i - 1], style: style.normalText,),
+                    ),
+                  ),
+                );
+              }
+          ),
         ),
       ),
     );

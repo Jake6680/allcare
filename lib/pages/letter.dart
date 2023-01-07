@@ -129,7 +129,7 @@ class checkLetter extends StatelessWidget {
   void showSnackBar(BuildContext context) {
     final snackBar = SnackBar(
       content: Text('성공', textAlign: TextAlign.center, style: style.normalText),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black.withOpacity(0.5),
       behavior: SnackBarBehavior.floating,
       shape: StadiumBorder(),
       width: 100,
@@ -147,7 +147,7 @@ class checkLetter extends StatelessWidget {
         ElevatedButton(onPressed: () {
           removeUserContent();
           showSnackBar(context);
-          Navigator.popUntil(context, ModalRoute.withName("/"));
+          Navigator.pushNamed(context, '/home');
         },
             style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
             child: Text('보내기', style: style.dialogCheckText)
