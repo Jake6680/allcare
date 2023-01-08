@@ -104,6 +104,8 @@ class _loginBodyState extends State<loginBody> {
             ),
           ),
           TextField(
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => print('비번입력? 연동 시켜보자!!!!!!!!!!!!!!!!! on프레스랑!!!!!!'),
               obscureText: true,
               controller: fieldPW,
               style: style.letterMainText,
@@ -119,7 +121,7 @@ class _loginBodyState extends State<loginBody> {
             height: 57,
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: (){},
+              onPressed: (){print('ㅎㅇ');},
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0),
