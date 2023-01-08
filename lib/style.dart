@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 
 
-var theme = ThemeData(
+ThemeData theme = ThemeData(
 
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -27,3 +27,9 @@ final dialogCheckText = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
 final dropDownBoxText = TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black);
 final speakerText = TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold);
 final noticeIconText = TextStyle(fontSize: 10,fontWeight: FontWeight.w600);
+final h1 = TextStyle( fontWeight: FontWeight.bold, fontSize: 30 );
+final loginTextField = UnderlineInputBorder( borderSide: BorderSide(width: 2, color: Colors.black));
+final textFieldLabel = TextStyle( color: Colors.grey, fontWeight: FontWeight.w500 );
+final registerNormalText = TextStyle(fontWeight: FontWeight.bold);
+final registerRedText = TextStyle(color: Colors.red);
+final registerDropBoxboder = BoxDecoration(border: Border.all(width: 1, color: Colors.black));
