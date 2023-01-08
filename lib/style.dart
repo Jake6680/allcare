@@ -20,6 +20,7 @@ ThemeData theme = ThemeData(
 final barText = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500);
 final normalText = TextStyle(color:Color(0xffffffff), fontSize: 20, fontWeight: FontWeight.w600 );
 final normalTextDark = TextStyle(color:Color(0xff000000), fontSize: 20, fontWeight: FontWeight.w600 );
+final normalTextRed = TextStyle(color:Colors.red, fontSize: 20, fontWeight: FontWeight.w600 );
 final floatingText = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
 final letterMainText = TextStyle( fontSize: 18, fontWeight: FontWeight.w400 );
 final dialogCheckButton = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)));
