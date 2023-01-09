@@ -132,8 +132,8 @@ class _MyAppState extends State<MyApp> {
           child: ListView.builder(
               itemCount: buttonName.length + 1,
               itemBuilder: (c, i) {
-                if (i == 0 && fireDataAlertSwitch == true) {
-                  return noticeAlert(fireDataAlertDetail: fireDataAlertDetail);
+                if (i == 0) {
+                  return fireDataAlertSwitch == true ? noticeAlert(fireDataAlertDetail: fireDataAlertDetail) : Container();
                 } else {
                   return ListTile(
                     title: Container(
