@@ -6,13 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'notification.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:allcare/firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import './pages/login.dart';
 import './style.dart' as style;
 import './pages/letter.dart';
 import './pages/notice.dart';
 
-
+final auth = FirebaseAuth.instance;
+final firestore = FirebaseFirestore.instance;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,12 +44,23 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'Daily Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
+  var fireDataName;
+  var fireDataKind;
 
+  fireGet() async{
+    await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
+      setState(() {
+        fireDataName = docName['name'];
+        fireDataKind = docName['job'];
+      });
+    }});
+  }
 
   @override
   void initState() {
     super.initState();
     initNotification();
+    fireGet();
   }
 
   @override
@@ -68,15 +82,16 @@ class _MyAppState extends State<MyApp> {
             automaticallyImplyLeading: false,
             title: Row(
               children: [
-                Image.asset('assets/Logo.png', width: 80),
+                Image.asset('assets/Logo.png', width: 79),
                 Text('올케어 관리형 독학관'),
               ],
             ),
 
+
             actions: [
               Column(children: [
-                Text('김OO',style: style.barText),
-                Text('수능',style: style.barText),
+                Text(fireDataName ?? 'Null',style: style.barText),
+                Text(fireDataKind ?? 'Null',style: style.barText),
               ],),
               Stack(
                 children: [
