@@ -45,7 +45,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'Daily Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
-  var fireDataName; var fireDataKind; var fireDataAlertDetail; var fireDataAlertSwitch;
+  var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch;
 
   void showSnackBar(BuildContext context, result) {
     final snackBar = SnackBar(
@@ -63,10 +63,9 @@ class _MyAppState extends State<MyApp> {
       await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
       setState(() {
         fireDataName = docName['name'];
-        fireDataKind = docName['job'];
       });
       }});
-      var result = await firestore.collection('alertBox').doc('alertID').get();
+      var result = await firestore.collection('Code').doc('alertID').get();
       setState(() {
         fireDataAlertSwitch = result['switch'];
         fireDataAlertDetail = result['content'];
@@ -110,10 +109,7 @@ class _MyAppState extends State<MyApp> {
 
 
             actions: [
-              Column(children: [
                 Text(fireDataName ?? 'Null',style: style.barText),
-                Text(fireDataKind ?? 'Null',style: style.barText),
-              ],),
               Stack(
                 children: [
                   IconButton(

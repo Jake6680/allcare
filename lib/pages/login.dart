@@ -44,9 +44,6 @@ class _loginUIState extends State<loginUI> {
           });
         }
         if (fireLoginLevel == true){
-          var storage = await SharedPreferences.getInstance();
-          storage.remove('userID');
-          storage.remove('userPW');
           setState(() {
             loginDataed = false;
           });
