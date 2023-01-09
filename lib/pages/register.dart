@@ -7,6 +7,7 @@ import '../style.dart' as style;
 
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
+
 class registerUI extends StatelessWidget {
   registerUI({Key? key}) : super(key: key);
 

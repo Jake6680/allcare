@@ -5,7 +5,7 @@
 
 
    <application
-        android:label="allcare"
+        android:label="올케어"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

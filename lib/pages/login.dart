@@ -269,7 +269,9 @@ class bottomTextButton extends StatelessWidget {
       children: [
         GestureDetector(
           child: Text('회원가입'),
-          onTap: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => registerUI() ));},
+          onTap: () {
+            Navigator.push(context, CupertinoPageRoute(builder: (c) => registerUI() ));
+            },
         ),
         Container(
             margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
@@ -303,6 +305,7 @@ class failDialog extends StatelessWidget {
     );
   }
 }
+
 
 
 
