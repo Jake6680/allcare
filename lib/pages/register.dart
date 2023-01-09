@@ -19,7 +19,7 @@ class registerUI extends StatelessWidget {
           backgroundColor: Colors.black.withOpacity(0.8),
           behavior: SnackBarBehavior.floating,
           shape: StadiumBorder(),
-          width: result == '다시확인해주세요.' ? 200 : 100,
+          width: result == '다시확인해주세요.' ? 200 : result == '성공' ? 100 : 200,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -54,11 +54,11 @@ class _registerBodyState extends State<registerBody> {
 
   getfirebaseinit () async{
     try {
-      var textLoginCode2 = await firestore.collection('Code').doc('vDZIUx9gIRsZcJJy9Dku').get();
+      var textLoginCode2 = await firestore.collection('Code').doc('codeID').get();
       textLoginCode = textLoginCode2['code'];
     }catch(e){
       setState(() {
-        widget.showSnackBar(context, '알수없음');
+        widget.showSnackBar(context, '알수없는오류');
         errorLevel = true;
       });
     }

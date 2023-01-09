@@ -22,6 +22,7 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(
       MaterialApp(
         theme: style.theme,
@@ -44,16 +45,35 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'Daily Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
-  var fireDataName;
-  var fireDataKind;
+  var fireDataName; var fireDataKind; var fireDataAlertDetail; var fireDataAlertSwitch;
+
+  void showSnackBar(BuildContext context, result) {
+    final snackBar = SnackBar(
+      content: Text(result, textAlign: TextAlign.center, style: style.normalText),
+      backgroundColor: Colors.black.withOpacity(0.8),
+      behavior: SnackBarBehavior.floating,
+      shape: StadiumBorder(),
+      width: result == '알수없는오류' ? 200 : 100,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   fireGet() async{
-    await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
+    try {
+      await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
       setState(() {
         fireDataName = docName['name'];
         fireDataKind = docName['job'];
       });
-    }});
+      }});
+      var result = await firestore.collection('customer').doc('alertID').get();
+      setState(() {
+        fireDataAlertSwitch = result['switch'];
+        fireDataAlertDetail = result['detail'];
+      });
+    }catch(e){
+      showSnackBar(context, '알수없는오류');
+    }
   }
 
   @override
@@ -112,7 +132,7 @@ class _MyAppState extends State<MyApp> {
           child: ListView.builder(
               itemCount: buttonName.length + 1,
               itemBuilder: (c, i){
-                if (i == 0) return noticeAlert();
+                if (i == 0  && fireDataAlertSwitch == true) {return noticeAlert( fireDataAlertDetail: fireDataAlertDetail );}
                 return ListTile(
                   title: Container(
                     margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
@@ -135,7 +155,8 @@ class _MyAppState extends State<MyApp> {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class noticeAlert extends StatelessWidget {
-  const noticeAlert({Key? key}) : super(key: key);
+  noticeAlert({Key? key, this.fireDataAlertDetail}) : super(key: key);
+  var fireDataAlertDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +182,7 @@ class noticeAlert extends StatelessWidget {
               padding: 0,
               speed: 70.0,
               child: Text(
-                "긴급공지 쓰는곳... on/off 설정 가능!",
+                fireDataAlertDetail,
                 style: style.speakerText,
                 maxLines: 1,
                 overflow: TextOverflow.visible,
