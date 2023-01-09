@@ -331,10 +331,10 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
   Widget build(BuildContext context) {
     String toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
     var toNewMap = {
-      'uid' : 'Text',
+      'uid' : 'Error',
       'name': widget.textLoginMap['이름'],
       'telephone': widget.textLoginMap['전화번호'],
-      'Seat': {widget.textLoginMap['자리번호'],widget.textLoginMap['자리번호_seat']},
+      'seat': {'place' : widget.textLoginMap['자리번호'],'number' : widget.textLoginMap['자리번호_seat']},
       'job' : widget.textLoginMap['학업'],
       'parent' : 'Not required'
     };
@@ -358,8 +358,10 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
                   email: toEmail,
                   password: widget.textLoginMap['비밀번호'],
                 );
-                print(result);
-                await firestore.collection('product').add(toNewMap);
+                setState(() {
+                  toNewMap['uid'] = result.user!.uid;
+                });
+                await firestore.collection('customer').add(toNewMap);
               } catch (e) {
                 widget.showSnackBar(context, '다시확인해주세요.');
                 setState(() {
@@ -390,10 +392,10 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
 
 
 class parentDialog extends StatefulWidget {
-  const parentDialog({Key? key, this.textLoginMap, this.showSnackBar, this.toNewMap}) : super(key: key);
-  final toNewMap;
+  parentDialog({Key? key, this.textLoginMap, this.showSnackBar, this.toNewMap}) : super(key: key);
   final showSnackBar;
   final textLoginMap;
+  var toNewMap;
 
   @override
   State<parentDialog> createState() => _parentDialogState();
@@ -401,6 +403,7 @@ class parentDialog extends StatefulWidget {
 
 class _parentDialogState extends State<parentDialog> {
   var textValue;
+  var parentContact;
   bool errorCheck = false;
 
   @override
@@ -421,9 +424,8 @@ class _parentDialogState extends State<parentDialog> {
         ),
         onChanged: (text){
           setState(() {
+            parentContact = text;
             textValue = text.length;
-            if (text.length == 11) { ////////////////////////////////////////////////////////////
-            }
           });
         },
       ),
@@ -436,18 +438,21 @@ class _parentDialogState extends State<parentDialog> {
                 email: toEmail,
                 password: widget.textLoginMap['비밀번호'],
               );
-              print(result);
-              await firestore.collection('product').add(widget.toNewMap);
+              setState(() {
+                widget.toNewMap['parent'] = parentContact;
+                widget.toNewMap['uid'] = result.user!.uid;
+              });
+              await firestore.collection('customer').add(widget.toNewMap);
             } catch (e) {
               widget.showSnackBar(context, '다시확인해주세요.');
               setState(() {
-              errorCheck = true;
+                errorCheck = true;
               });
             }
             if (errorCheck != true) {
               Future(() {
-              widget.showSnackBar(context, '성공');
-              Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+                widget.showSnackBar(context, '성공');
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
               });
             }else{
               Future((){Navigator.pop(context);});

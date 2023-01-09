@@ -14,24 +14,62 @@ class loginUI extends StatefulWidget {
 }
 
 class _loginUIState extends State<loginUI> {
-  var logining = false;
+  bool loginDataed = false;
+  bool fireLoginLevel = false;
+
+  void showSnackBar(BuildContext context, result) {
+    final snackBar = SnackBar(
+      content: Text(result, textAlign: TextAlign.center, style: style.normalText),
+      backgroundColor: Colors.black.withOpacity(0.8),
+      behavior: SnackBarBehavior.floating,
+      shape: StadiumBorder(),
+      width: 200,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   getUserImformation() async{
     var content = await SharedPreferences.getInstance();
     var userID = content.getString('userID');
-    setState(() {
-      if (userID != null) {
-        var userPW = content.getString('userID');
-        logining = true;
+    var userPW = content.getString('userPW');
+      if (userID != null && userPW != null) {
+        try {
+          await auth.signInWithEmailAndPassword(
+              email: userID,
+              password: userPW
+          );
+        } catch (e) {
+          setState(() {
+            fireLoginLevel = true;
+          });
+        }
+        if (fireLoginLevel == true){
+          var storage = await SharedPreferences.getInstance();
+          storage.remove('userID');
+          storage.remove('userPW');
+          setState(() {
+            loginDataed = false;
+          });
+        }else {
+          setState(() {
+            loginDataed = true;
+          });
+        }
       }else{
-        logining = false;
+        setState(() {
+          loginDataed = false;
+        });
       }
-    });
-  }
-  setUserContent(userID, userPW) async{
-    var content = await SharedPreferences.getInstance();
-    content.setString('userID', userID);
-    content.setString('userPW', userPW);
+    if (loginDataed == true) {
+      Future((){
+      Navigator.of(context).pushNamedAndRemoveUntil(
+          '/home', (Route<dynamic> route) => false);
+      });
+    } else if (fireLoginLevel == true) {
+      Future((){
+        showSnackBar(context, '로그인 실패');
+      });
+    }
   }
 
 
@@ -39,12 +77,8 @@ class _loginUIState extends State<loginUI> {
   void initState() {
     super.initState();
     getUserImformation();
-    if (logining == true){
-      Future(() {
-        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-      });
-    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,14 +172,15 @@ class loginWidget extends StatelessWidget {
 
 
 class pwWidget extends StatelessWidget {
-  const pwWidget({Key? key, this.getlonginPW}) : super(key: key);
+  pwWidget({Key? key, this.getlonginPW}) : super(key: key);
   final getlonginPW;
+  bool errorLevel = false;
+
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       textInputAction: TextInputAction.done,
-      onSubmitted: (_) => print('비번입력? 연동 시켜보자!!!!!!!!!!!!!!!!! on프레스랑!!!!!!'),
       obscureText: true,
       style: style.letterMainText,
       decoration: InputDecoration(
@@ -168,14 +203,53 @@ class loginButton extends StatelessWidget {
   final textFieldID;
   final textFieldPW;
 
+
   @override
   Widget build(BuildContext context) {
+    bool errorLevel = false;
+
+    setUserContent(userID, userPW) async{
+      var content = await SharedPreferences.getInstance();
+      content.setString('userID', userID);
+      content.setString('userPW', userPW);
+    }
+
+    void showSnackBar(BuildContext context, result) {
+      final snackBar = SnackBar(
+        content: Text(result, textAlign: TextAlign.center, style: style.normalText),
+        backgroundColor: Colors.black.withOpacity(0.8),
+        behavior: SnackBarBehavior.floating,
+        shape: StadiumBorder(),
+        width: result == '아이디 또는 비밀번호를 틀렸습니다.' ? 300 : 100,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
     return Container(
       margin: EdgeInsets.fromLTRB(0, 30, 0, 30),
       height: 57,
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: (){},
+        onPressed: ()async{
+          var toEmailID = '${textFieldID + '@studyallcare.com'}';
+          print(toEmailID);
+          try {
+            await auth.signInWithEmailAndPassword(
+                email: toEmailID,
+                password: textFieldPW
+            );
+          } catch (e) {
+            showSnackBar(context, '아이디 또는 비밀번호를 틀렸습니다.');
+            errorLevel = true;
+          }
+          if (errorLevel != true) {
+            Future((){
+              setUserContent(toEmailID, textFieldPW);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/home', (Route<dynamic> route) => false);
+            });
+          }
+        },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),
@@ -206,13 +280,32 @@ class bottomTextButton extends StatelessWidget {
         ),
         GestureDetector(
           child: Text('비밀번호 찾기'),
-          onTap: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => registerUI() ));},
+          onTap: (){showDialog(context: context, builder: (context) => failDialog());},
         ),
       ],
     );
   }
 }
 
+
+class failDialog extends StatelessWidget {
+  const failDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('원장 또는 총무에게 문의해주세요.', style: style.normalTextDark),
+      shape: style.dialogCheckButton,
+      actions: [
+        ElevatedButton(
+          onPressed: (){Navigator.pop(context);},
+          style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
+          child: Text('닫기', style: style.dialogCheckText),
+        )
+      ],
+    );
+  }
+}
 
 
 
