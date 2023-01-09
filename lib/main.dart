@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
         fireDataKind = docName['job'];
       });
       }});
-      var result = await firestore.collection('customer').doc('alertID').get();
+      var result = await firestore.collection('alertBox').doc('alertID').get();
       setState(() {
         fireDataAlertSwitch = result['switch'];
         fireDataAlertDetail = result['detail'];
