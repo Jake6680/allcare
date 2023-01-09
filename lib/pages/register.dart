@@ -12,15 +12,28 @@ class registerUI extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    void showSnackBar(BuildContext context, result) {
+        final snackBar = SnackBar(
+          content: Text(result, textAlign: TextAlign.center, style: style.normalText),
+          backgroundColor: Colors.black.withOpacity(0.8),
+          behavior: SnackBarBehavior.floating,
+          shape: StadiumBorder(),
+          width: result == '다시확인해주세요.' ? 200 : 100,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
     return Scaffold(
-      body: registerBody(),
+      body: registerBody( showSnackBar: showSnackBar ),
     );
   }
 }
 
 
 class registerBody extends StatefulWidget {
-  registerBody({Key? key}) : super(key: key);
+  registerBody({Key? key, this.showSnackBar}) : super(key: key);
+  final showSnackBar;
 
   @override
   State<registerBody> createState() => _registerBodyState();
@@ -30,22 +43,31 @@ class _registerBodyState extends State<registerBody> {
   TextEditingController registerID = TextEditingController();
   var viewList = ['아이디', '비밀번호', '비밀번호확인','이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
   var textLoginMap = {};
-  var textLoginID; var textLoginPW; var textLoginName; var textLoginTelephon; var textLoginSeat; var textLoginKind; var textLoginCode;
+  var textLoginCode;
+  bool errorLevel = false;
 
-  sendDataWidge(a, b){
+  sendDataWidge(name, content){
     setState(() {
-      textLoginMap[a] = b;
+      textLoginMap[name] = content;
     });
   }
 
   getfirebaseinit () async{
+    try {
       var textLoginCode2 = await firestore.collection('Code').doc('vDZIUx9gIRsZcJJy9Dku').get();
-      if (textLoginCode2['code'].isEmpty){
-        print('오류');
-      }
+      textLoginCode = textLoginCode2['code'];
+    }catch(e){
       setState(() {
-        textLoginCode = textLoginCode2['code'];
+        widget.showSnackBar(context, '알수없음');
+        errorLevel = true;
       });
+    }
+    if (errorLevel == true) {
+      Future((){
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/', (Route<dynamic> route) => false);
+      });
+    }
   }
 
   @override
@@ -70,7 +92,7 @@ class _registerBodyState extends State<registerBody> {
             }else if(viewList[index] == '학업') {
               return registerKindWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
             }else if (viewList[index] == '버튼'){
-              return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap );
+              return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar );
             }else {
             return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
             }
@@ -198,15 +220,15 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
                 value: selectedDropdown2,
                 items: dropdownList2.map((String item) {
                   return DropdownMenuItem<String>(
-                    child: Text('$item'),
                     value: item,
+                    child: Text(item),
                   );
                 }).toList(),
                 onChanged: (dynamic value) {
                     widget.sendDataWidge(widget.viewList, value);
                     setState((){
                       selectedDropdown2 = value;
-                    FocusScope.of(context).nextFocus();
+                      FocusScope.of(context).nextFocus();
                     });
                 },
               ),
@@ -226,9 +248,8 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
                       counterText:'',
                     ),
                     onChanged: (text){
-                      if (text.length == 2){FocusScope.of(context).nextFocus();}else{
-                        widget.sendDataWidge('${widget.viewList+'_seat'}', text);
-                      }
+                      widget.sendDataWidge('${widget.viewList+'_seat'}', text);
+                      if (text.length == 2){ FocusScope.of(context).nextFocus(); }
                     },
                   ),
                 ),
@@ -274,8 +295,8 @@ class _registerKindWidgetState extends State<registerKindWidget> {
               value: selectedDropdown,
               items: dropdownList.map((String item) {
                 return DropdownMenuItem<String>(
-                  child: Text('$item'),
                   value: item,
+                  child: Text(item),
                 );
               }).toList(),
               onChanged: (dynamic value) {
@@ -295,41 +316,21 @@ class _registerKindWidgetState extends State<registerKindWidget> {
 
 
 class registerSignUpButton extends StatefulWidget {
-  registerSignUpButton({Key? key, this.textLoginCode, this.textLoginMap}) : super(key: key);
+  registerSignUpButton({Key? key, this.textLoginCode, this.textLoginMap, this.showSnackBar}) : super(key: key);
   final textLoginCode;
   final textLoginMap;
+  final showSnackBar;
 
   @override
   State<registerSignUpButton> createState() => _registerSignUpButtonState();
 }
 
 class _registerSignUpButtonState extends State<registerSignUpButton> {
-  void showSnackBar(BuildContext context, result) {
-    if (result != '다시확인해주세요.'){
-      final snackBar = SnackBar(
-        content: Text(result, textAlign: TextAlign.center, style: style.normalText),
-        backgroundColor: Colors.black.withOpacity(0.8),
-        behavior: SnackBarBehavior.floating,
-        shape: StadiumBorder(),
-        width: 100,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }else {
-      final snackBar = SnackBar(
-        content: Text(result, textAlign: TextAlign.center, style: style.normalText),
-        backgroundColor: Colors.black.withOpacity(0.8),
-        behavior: SnackBarBehavior.floating,
-        shape: StadiumBorder(),
-        width: 200,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    var toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
-    final toNewMap = {
+    String toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
+    var toNewMap = {
       'uid' : 'Text',
       'name': widget.textLoginMap['이름'],
       'telephone': widget.textLoginMap['전화번호'],
@@ -338,6 +339,8 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
       'parent' : 'Not required'
     };
     bool errorCheck = false;
+
+
     return Container(
       margin: EdgeInsets.fromLTRB(20, 20, 20, 20),
       height: 50,
@@ -347,35 +350,33 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
           if (widget.textLoginCode != widget.textLoginMap['확인 코드'] || widget.textLoginCode == null){
             showDialog(context: context, builder: (context) => failDialog() );
             } else{
-            if (widget.textLoginMap['학업'] == '고등부'){
-              showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap) );
-            }else{
+            if (widget.textLoginMap['학업'] == '고등부'){  //고등학생일시 부모님 전화번호 입력
+              showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
+            }else{  //아닐시 그냥 회원가입 시도!
               try {
-                await auth.createUserWithEmailAndPassword(
+                var result = await auth.createUserWithEmailAndPassword(
                   email: toEmail,
                   password: widget.textLoginMap['비밀번호'],
                 );
+                print(result);
                 await firestore.collection('product').add(toNewMap);
               } catch (e) {
-                showSnackBar(context, '다시확인해주세요.');
+                widget.showSnackBar(context, '다시확인해주세요.');
                 setState(() {
                   errorCheck = true;
                 });
               }
-                if (errorCheck != true) {
-                  Future(() {
-                    showSnackBar(context, '성공');
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/', (Route<dynamic> route) => false);
+              if (errorCheck != true) {
+                Future(() {
+                  widget.showSnackBar(context, '성공');
+                  Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
                   });
-                }
-                else{
-                  Future((){Navigator.pop(context);});
-                }
+              }else{
+                Future((){Navigator.pop(context);});
               }
             }
           }
-        },
+          },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),
@@ -387,27 +388,11 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
   }
 }
 
-class failDialog extends StatelessWidget {
-  const failDialog({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('확인코드가 일치하지않습니다.', style: style.normalTextDark),
-      shape: style.dialogCheckButton,
-      actions: [
-        ElevatedButton(
-          onPressed: (){Navigator.pop(context);},
-          style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
-          child: Text('닫기', style: style.dialogCheckText),
-        )
-      ],
-    );
-  }
-}
 
 class parentDialog extends StatefulWidget {
-  const parentDialog({Key? key, this.textLoginMap}) : super(key: key);
+  const parentDialog({Key? key, this.textLoginMap, this.showSnackBar, this.toNewMap}) : super(key: key);
+  final toNewMap;
+  final showSnackBar;
   final textLoginMap;
 
   @override
@@ -417,28 +402,6 @@ class parentDialog extends StatefulWidget {
 class _parentDialogState extends State<parentDialog> {
   var textValue;
   bool errorCheck = false;
-
-  void showSnackBar(BuildContext context, result) {
-    if (result != '다시확인해주세요.'){
-    final snackBar = SnackBar(
-      content: Text(result, textAlign: TextAlign.center, style: style.normalText),
-      backgroundColor: Colors.black.withOpacity(0.8),
-      behavior: SnackBarBehavior.floating,
-      shape: StadiumBorder(),
-      width: 100,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }else {
-      final snackBar = SnackBar(
-        content: Text(result, textAlign: TextAlign.center, style: style.normalText),
-        backgroundColor: Colors.black.withOpacity(0.8),
-        behavior: SnackBarBehavior.floating,
-        shape: StadiumBorder(),
-        width: 200,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -459,7 +422,8 @@ class _parentDialogState extends State<parentDialog> {
         onChanged: (text){
           setState(() {
             textValue = text.length;
-            if (text.length == 11){FocusScope.of(context).nextFocus();}
+            if (text.length == 11) { ////////////////////////////////////////////////////////////
+            }
           });
         },
       ),
@@ -472,17 +436,18 @@ class _parentDialogState extends State<parentDialog> {
                 email: toEmail,
                 password: widget.textLoginMap['비밀번호'],
               );
+              print(result);
+              await firestore.collection('product').add(widget.toNewMap);
             } catch (e) {
-              showSnackBar(context, '다시확인해주세요.');
+              widget.showSnackBar(context, '다시확인해주세요.');
               setState(() {
-                errorCheck = true;
+              errorCheck = true;
               });
             }
-            if (errorCheck != true){
+            if (errorCheck != true) {
               Future(() {
-                showSnackBar(context, '성공');
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/', (Route<dynamic> route) => false);
+              widget.showSnackBar(context, '성공');
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
               });
             }else{
               Future((){Navigator.pop(context);});
@@ -495,6 +460,25 @@ class _parentDialogState extends State<parentDialog> {
           onPressed: () {Navigator.pop(context);},
           style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
           child: Text('취소', style: style.dialogCheckText),
+        )
+      ],
+    );
+  }
+}
+
+class failDialog extends StatelessWidget {
+  const failDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('확인코드가 일치하지않습니다.', style: style.normalTextDark),
+      shape: style.dialogCheckButton,
+      actions: [
+        ElevatedButton(
+          onPressed: (){Navigator.pop(context);},
+          style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
+          child: Text('닫기', style: style.dialogCheckText),
         )
       ],
     );
