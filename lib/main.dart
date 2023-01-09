@@ -131,18 +131,22 @@ class _MyAppState extends State<MyApp> {
           color: Color(0xffefefef),
           child: ListView.builder(
               itemCount: buttonName.length + 1,
-              itemBuilder: (c, i){
-                if (i == 0  && fireDataAlertSwitch == true) {return noticeAlert( fireDataAlertDetail: fireDataAlertDetail );}
-                return ListTile(
-                  title: Container(
-                    margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
-                    height: 57,
-                    child: ElevatedButton(
-                      onPressed: (){},
-                      child: Text(buttonName[i - 1], style: style.normalText,),
+              itemBuilder: (c, i) {
+                if (i == 0 && fireDataAlertSwitch == true) {
+                  return noticeAlert(fireDataAlertDetail: fireDataAlertDetail);
+                } else {
+                  return ListTile(
+                    title: Container(
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
+                      height: 57,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text(
+                          buttonName[i - 1], style: style.normalText,),
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               }
           ),
         ),
