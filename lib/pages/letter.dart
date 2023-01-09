@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../style.dart' as style;
 
+final firestore = FirebaseFirestore.instance;
+final auth = FirebaseAuth.instance;
 
 
 class letterUI extends StatefulWidget {
@@ -81,7 +85,6 @@ class _letterUIState extends State<letterUI> {
 
 class sendDialog extends StatelessWidget {
   sendDialog({Key? key, this.letterData}) : super(key: key);
-
   final letterData;
 
   @override
@@ -90,7 +93,7 @@ class sendDialog extends StatelessWidget {
       child: ((){if (letterData == '') {
         return cancelLetter();
       }else{
-        return checkLetter();
+        return checkLetter( letterData : letterData );
       }
       })(),
     );
@@ -118,18 +121,27 @@ class cancelLetter extends StatelessWidget {
 }
 
 
-class checkLetter extends StatelessWidget {
-  const checkLetter({Key? key}) : super(key: key);
+class checkLetter extends StatefulWidget {
+  checkLetter({Key? key, this.letterData}) : super(key: key);
+  final letterData;
+
+  @override
+  State<checkLetter> createState() => _checkLetterState();
+}
+
+class _checkLetterState extends State<checkLetter> {
+  bool sendErrorLevel = false;
+  var fireDataName;
 
   removeUserContent() async {
     var content = await SharedPreferences.getInstance();
     content.remove('letterContent');
   }
 
-  void showSnackBar(BuildContext context) {
+  void showSnackBar(BuildContext context, content) {
     final snackBar = SnackBar(
-      content: Text('성공', textAlign: TextAlign.center, style: style.normalText),
-      backgroundColor: Colors.black.withOpacity(0.5),
+      content: Text(content, textAlign: TextAlign.center, style: style.normalText),
+      backgroundColor: Colors.black.withOpacity(0.7),
       behavior: SnackBarBehavior.floating,
       shape: StadiumBorder(),
       width: 100,
@@ -139,15 +151,34 @@ class checkLetter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return AlertDialog(
       title: Text('원장님에게만 익명으로 보내드립니다.',
         style: style.normalTextDark),
       shape: style.dialogCheckButton,
       actions: [
-        ElevatedButton(onPressed: () {
-          removeUserContent();
-          showSnackBar(context);
-          Navigator.pushNamed(context, '/home');
+        ElevatedButton(onPressed: () async{
+          try{
+            await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
+              setState(() {
+                fireDataName = docName['name'];
+              });
+            }});
+            await firestore.collection('letter').add({'name' : fireDataName,'content' : widget.letterData});
+          }catch(e) {
+            showSnackBar(context, '알수없는 오류');
+            Navigator.pushNamed(context, '/home');
+            setState(() {
+              sendErrorLevel = true;
+            });
+          }
+          if (sendErrorLevel != true){
+            Future((){
+              removeUserContent();
+              showSnackBar(context, '성공');
+              Navigator.pushNamed(context, '/home');
+            });
+          };
         },
             style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
             child: Text('보내기', style: style.dialogCheckText)

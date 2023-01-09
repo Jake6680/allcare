@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
       backgroundColor: Colors.black.withOpacity(0.8),
       behavior: SnackBarBehavior.floating,
       shape: StadiumBorder(),
-      width: result == '알수없는오류' ? 200 : 100,
+      width: result == '알수없는 오류' ? 200 : 100,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -69,10 +69,11 @@ class _MyAppState extends State<MyApp> {
       var result = await firestore.collection('alertBox').doc('alertID').get();
       setState(() {
         fireDataAlertSwitch = result['switch'];
-        fireDataAlertDetail = result['detail'];
+        fireDataAlertDetail = result['content'];
       });
     }catch(e){
-      showSnackBar(context, '알수없는오류');
+      print(e);
+      showSnackBar(context, '알수없는 오류');
     }
   }
 
@@ -185,11 +186,16 @@ class noticeAlert extends StatelessWidget {
               maxWidth: _width / 1.5,
               padding: 0,
               speed: 70.0,
-              child: Text(
-                fireDataAlertDetail,
-                style: style.speakerText,
-                maxLines: 1,
-                overflow: TextOverflow.visible,
+              child: GestureDetector(
+                child: Text(
+                  fireDataAlertDetail,
+                  style: style.speakerText,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                ),
+                onTap: (){
+                  showDialog(context: context, builder: (context) => alertDetailDialog(fireDataAlertDetail : fireDataAlertDetail));
+                },
               ),
             ),
           ],
@@ -227,6 +233,27 @@ class alertIconUI extends StatelessWidget {
     );
   }
 }
+
+class alertDetailDialog extends StatelessWidget {
+  const alertDetailDialog({Key? key, this.fireDataAlertDetail}) : super(key: key);
+  final fireDataAlertDetail;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(fireDataAlertDetail, style: style.normalTextDark),
+      shape: style.dialogCheckButton,
+      actions: [
+        ElevatedButton(
+          onPressed: (){Navigator.pop(context);},
+          style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
+          child: Text('닫기', style: style.dialogCheckText),
+        )
+      ],
+    );
+  }
+}
+
 
 
 
