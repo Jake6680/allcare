@@ -43,25 +43,36 @@ class registerBody extends StatefulWidget {
 
 class _registerBodyState extends State<registerBody> {
   TextEditingController registerID = TextEditingController();
-  var viewList = ['아이디', '비밀번호', '비밀번호확인','이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
+  var viewList = ['아이디', '비밀번호', '비밀번호 확인','이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
   var textLoginMap = {};
   var textLoginCode;
+  var fireDataID = [];
+  var textFiedlState = [];
   bool errorLevel = false;
 
   getTextLoginMap(name){
       return textLoginMap[name];
   }
 
-  sendDataWidge(name, content){
+  sendDataWidge(name, content, boolState){
     setState(() {
       textLoginMap[name] = content;
+      textFiedlState.add(boolState);
     });
   }
 
   getfirebaseinit () async{
     try {
+      var result = await firestore.collection('contact').get();
+      for (var doc in result.docs){
+        setState(() {
+          fireDataID.add(doc['ID']);
+        });
+      }
       var textLoginCode2 = await firestore.collection('Code').doc('codeID').get();
-      textLoginCode = textLoginCode2['code'];
+      setState(() {
+        textLoginCode = textLoginCode2['code'];
+      });
     }catch(e){
       setState(() {
         widget.showSnackBar(context, '알수없는오류');
@@ -70,8 +81,7 @@ class _registerBodyState extends State<registerBody> {
     }
     if (errorLevel == true) {
       Future((){
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            '/', (Route<dynamic> route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
       });
     }
   }
@@ -91,14 +101,16 @@ class _registerBodyState extends State<registerBody> {
         SliverFixedExtentList(
           itemExtent: 90.0,
           delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            if (viewList[index] == '전화번호'){
-              return registerTelephonWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
+          if (viewList[index] == '아이디'){
+            return registerIDWidget( fireDataID : fireDataID, sendDataWidge : sendDataWidge );
+            }else if (viewList[index] == '전화번호'){
+              return registerTelephonWidget( sendDataWidge : sendDataWidge );
             }else if(viewList[index] == '자리번호'){
-              return registerSeatWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
+              return registerSeatWidget( sendDataWidge : sendDataWidge );
             }else if(viewList[index] == '학업') {
-              return registerKindWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
+              return registerKindWidget( sendDataWidge : sendDataWidge );
             }else if (viewList[index] == '버튼'){
-              return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar );
+              return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar, textFiedlState: textFiedlState );
             }else {
             return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap );
             }
@@ -112,11 +124,100 @@ class _registerBodyState extends State<registerBody> {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+class registerIDWidget extends StatefulWidget {
+  const registerIDWidget({Key? key, this.fireDataID, this.sendDataWidge}) : super(key: key);
+  final fireDataID;
+  final sendDataWidge;
+  
+  @override
+  State<registerIDWidget> createState() => _registerIDWidgetState();
+}
+
+class _registerIDWidgetState extends State<registerIDWidget> {
+  bool overlapCheckBox = false;
+  bool checkID = false;
+
+  var textFieldID;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('아이디', style: style.registerNormalText,),
+              Text('*', style: style.registerRedText,),
+            ],
+          ),
+          Row(
+            children: [
+              Flexible(
+                flex: 2,
+                fit: FlexFit.tight,
+                child: TextField(
+                  decoration: InputDecoration(
+                    suffix: Icon(overlapCheckBox == true ? Icons.cancel : Icons.check, color: overlapCheckBox == true ? Colors.red : Colors.green, size: checkID == false ? 0 : 20,)
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (text){
+                    setState(() {
+                      textFieldID = text;
+                      checkID = false;
+                      overlapCheckBox = false;
+                      widget.sendDataWidge('ID', textFieldID, false);
+                    });
+                  },
+                ),
+              ),
+              Flexible(
+                  fit: FlexFit.tight,
+                  child: ElevatedButton(onPressed: (){
+                    if (textFieldID == null){
+                      showDialog(context: context, builder: (context) => failDialog(failContent : '아이디를 입력해주세요.'));
+                    } else{
+                      for(var textFieldIDCheck in widget.fireDataID){
+                        if (textFieldID == textFieldIDCheck){
+                          setState(() {
+                            overlapCheckBox = true;
+                          });
+                        }
+                      }
+                      setState(() {
+                        checkID = true;
+                      });
+                      if (overlapCheckBox == false){
+                        widget.sendDataWidge('ID', textFieldID, true);
+                        showDialog(context: context, builder: (context) => failDialog(failContent : '사용가능한 아이디입니다.'));
+                        Future((){FocusScope.of(context).nextFocus();});
+                      }else{
+                        showDialog(context: context, builder: (context) => failDialog(failContent : '이미 사용중인 아이디입니다.'));
+                      }
+                    }
+                  }, child: Text('중복 체크', style: style.suffixElevatedButton))
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+
 class registerNoneWidget extends StatefulWidget {
   const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap}) : super(key: key);
   final viewList;
   final sendDataWidge;
   final getTextLoginMap;
+
   @override
   State<registerNoneWidget> createState() => _registerNoneWidgetState();
 }
@@ -124,6 +225,13 @@ class registerNoneWidget extends StatefulWidget {
 class _registerNoneWidgetState extends State<registerNoneWidget> {
   var errorMessage = '';
   var checkBox = {};
+
+  errorCheckFuction(viewList, content, check){
+    setState(() {
+      errorMessage = content;
+      checkBox = {viewList : check};
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,23 +252,34 @@ class _registerNoneWidgetState extends State<registerNoneWidget> {
           ),
           TextField(
             decoration: InputDecoration(
-                suffix: Icon(Icons.check,color: Colors.green, size: checkBox[widget.viewList] == true ? 20 : 0,)
+                suffix: Icon(checkBox[widget.viewList] == false ? Icons.cancel : Icons.check,color: checkBox[widget.viewList] == false ? Colors.red : Colors.green, size: checkBox[widget.viewList] == null ? 0 : 20,)
             ),
-              obscureText: widget.viewList == '비밀번호' || widget.viewList == '비밀번호확인' ? true : false,
+              obscureText: widget.viewList == '비밀번호' || widget.viewList == '비밀번호 확인' ? true : false,
               textInputAction: widget.viewList == '확인코드' ? TextInputAction.done : TextInputAction.next,
             onChanged: (text){
-                if (widget.viewList != '비밀번호확인') {
-                  widget.sendDataWidge(widget.viewList, text);
-                }else if (widget.getTextLoginMap('비밀번호') != text){
-                  setState(() {
-                    errorMessage = '비밀번호가 일치하지않습니다.';
-                    checkBox = {widget.viewList : false};
-                  });
-                }else{
-                  setState(() {
-                    errorMessage = '';
-                    checkBox = {widget.viewList : true};
-                  });
+                if (widget.viewList != '비밀번호 확인') {
+                  if (widget.viewList == '비밀번호'){
+                    if (text.length < 6){
+                      widget.sendDataWidge(widget.viewList, text, false);
+                      errorCheckFuction(widget.viewList, '비밀번호는 6자(영문 기준) 이상이어야 합니다.', false);
+                    }else{
+                      widget.sendDataWidge(widget.viewList, text, true);
+                      errorCheckFuction(widget.viewList, '', true);
+                    }
+                  }else if (widget.viewList == '확인 코드'){
+                    widget.sendDataWidge(widget.viewList, text, true);
+                    errorCheckFuction(widget.viewList, '', null);
+                  }else {
+                    widget.sendDataWidge(widget.viewList, text, true);
+                    errorCheckFuction(widget.viewList, '', true);
+                  }
+                }
+                if (widget.viewList == '비밀번호 확인') {
+                  if (widget.getTextLoginMap('비밀번호') != text) {
+                    errorCheckFuction(widget.viewList, '비밀번호가 일치하지않습니다.', false);
+                  }else{
+                    errorCheckFuction(widget.viewList, '', true);
+                  }
                 }
             },
           )
@@ -172,8 +291,7 @@ class _registerNoneWidgetState extends State<registerNoneWidget> {
 
 
 class registerTelephonWidget extends StatefulWidget {
-  registerTelephonWidget({Key? key, this.viewList, this.sendDataWidge}) : super(key: key);
-  final viewList;
+  registerTelephonWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
@@ -191,7 +309,7 @@ class _registerTelephonWidgetState extends State<registerTelephonWidget> {
         children: [
           Row(
             children: [
-              Text(widget.viewList, style: style.registerNormalText,),
+              Text('전화번호', style: style.registerNormalText,),
               Text('*',style: style.registerRedText,)
             ],
           ),
@@ -203,10 +321,10 @@ class _registerTelephonWidgetState extends State<registerTelephonWidget> {
             decoration: InputDecoration(
                 hintText: '010-1234-5678',
                 counterText: "",
-                suffix: Text("${textValue ?? '0'} / 11")
+                suffix: textValue == 11 ? Icon(Icons.check,color: Colors.green, size: 20,) : Text("${textValue ?? '0'} / 11")
             ),
             onChanged: (text){
-              widget.sendDataWidge(widget.viewList, text);
+              widget.sendDataWidge('전화번호', text, true);
               setState(() {
                 textValue = text.length;
                 if (text.length == 11){FocusScope.of(context).nextFocus();}
@@ -220,8 +338,7 @@ class _registerTelephonWidgetState extends State<registerTelephonWidget> {
 }
 
 class registerSeatWidget extends StatefulWidget {
-  registerSeatWidget({Key? key, this.viewList, this.sendDataWidge}) : super(key: key);
-  final viewList;
+  registerSeatWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
@@ -240,7 +357,7 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.viewList, style: style.registerNormalText,),
+            Text('자리번호', style: style.registerNormalText,),
             Text('*',style: style.registerRedText,),
             Container(
               decoration: style.registerDropBoxboder,
@@ -256,7 +373,7 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
                   );
                 }).toList(),
                 onChanged: (dynamic value) {
-                    widget.sendDataWidge(widget.viewList, value);
+                    widget.sendDataWidge('자리번호', value, true);
                     setState((){
                       selectedDropdown2 = value;
                       FocusScope.of(context).nextFocus();
@@ -279,7 +396,7 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
                       counterText:'',
                     ),
                     onChanged: (text){
-                      widget.sendDataWidge('${widget.viewList+'_seat'}', text);
+                      widget.sendDataWidge('자리번호_seat', text, true);
                       if (text.length == 2){ FocusScope.of(context).nextFocus(); }
                     },
                   ),
@@ -295,8 +412,7 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
 
 
 class registerKindWidget extends StatefulWidget {
-  registerKindWidget({Key? key, this.viewList, this.sendDataWidge}) : super(key: key);
-  final viewList;
+  registerKindWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
@@ -315,7 +431,7 @@ class _registerKindWidgetState extends State<registerKindWidget> {
       child:Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.viewList, style: style.registerNormalText,),
+          Text('학업', style: style.registerNormalText,),
           Text('*',style: style.registerRedText,),
           Container(
             decoration: style.registerDropBoxboder,
@@ -331,7 +447,7 @@ class _registerKindWidgetState extends State<registerKindWidget> {
                 );
               }).toList(),
               onChanged: (dynamic value) {
-                widget.sendDataWidge(widget.viewList, value);
+                widget.sendDataWidge('학업', value, true);
                 setState(() {
                   selectedDropdown = value;
                   FocusScope.of(context).nextFocus();
@@ -347,10 +463,11 @@ class _registerKindWidgetState extends State<registerKindWidget> {
 
 
 class registerSignUpButton extends StatefulWidget {
-  registerSignUpButton({Key? key, this.textLoginCode, this.textLoginMap, this.showSnackBar}) : super(key: key);
+  registerSignUpButton({Key? key, this.textLoginCode, this.textLoginMap, this.showSnackBar, this.textFiedlState}) : super(key: key);
   final textLoginCode;
   final textLoginMap;
   final showSnackBar;
+  final textFiedlState;
 
   @override
   State<registerSignUpButton> createState() => _registerSignUpButtonState();
@@ -362,6 +479,7 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
   Widget build(BuildContext context) {
     String toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
     var toNewMap = {
+      'pw' : widget.textLoginMap['비밀번호'],
       'uid' : 'Error',
       'name': widget.textLoginMap['이름'],
       'telephone': widget.textLoginMap['전화번호'],
@@ -379,8 +497,9 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
       child: ElevatedButton(
         onPressed: () async{
           if (widget.textLoginCode != widget.textLoginMap['확인 코드'] || widget.textLoginCode == null){
-            showDialog(context: context, builder: (context) => failDialog() );
-            } else{
+            showDialog(context: context, builder: (context) => failDialog( failContent : '확인코드가 일치하지않습니다.' ) );
+            }else {
+              print(widget.textFiedlState);
             if (widget.textLoginMap['학업'] == '고등부'){  //고등학생일시 부모님 전화번호 입력
               showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
             }else{  //아닐시 그냥 회원가입 시도!
@@ -393,6 +512,7 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
                   toNewMap['uid'] = result.user!.uid;
                 });
                 await firestore.collection('customer').add(toNewMap);
+                await firestore.collection('contact').add({'ID' : widget.textLoginMap['아이디']});
               } catch (e) {
                 widget.showSnackBar(context, '다시확인해주세요.');
                 setState(() {
@@ -503,12 +623,13 @@ class _parentDialogState extends State<parentDialog> {
 }
 
 class failDialog extends StatelessWidget {
-  const failDialog({Key? key}) : super(key: key);
+  const failDialog({Key? key, this.failContent}) : super(key: key);
 
+  final failContent;
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('확인코드가 일치하지않습니다.', style: style.normalTextDark),
+      title: Text(failContent, style: style.normalTextDark),
       shape: style.dialogCheckButton,
       actions: [
         ElevatedButton(

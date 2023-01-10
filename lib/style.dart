@@ -35,3 +35,4 @@ final registerNormalText = TextStyle(fontWeight: FontWeight.bold);
 final registerRedText = TextStyle(color: Colors.red);
 final registerRedText2 = TextStyle(color: Colors.red, fontWeight: FontWeight.w500);
 final registerDropBoxboder = BoxDecoration(border: Border.all(width: 1, color: Colors.black));
+final suffixElevatedButton = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);

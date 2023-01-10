@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-
+import 'package:network_info_plus/network_info_plus.dart';
 
 import '../style.dart' as style;
 
+final info = NetworkInfo();
 
 class loginUI extends StatefulWidget {
   loginUI({Key? key}) : super(key: key);
@@ -21,6 +22,7 @@ class _loginUIState extends State<loginUI> {
 
   void showSnackBar(BuildContext context, result) {
     final snackBar = SnackBar(
+      duration: Duration(seconds: 3),
       content: Text(result, textAlign: TextAlign.center, style: style.normalText),
       backgroundColor: Colors.black.withOpacity(0.8),
       behavior: SnackBarBehavior.floating,
@@ -75,6 +77,9 @@ class _loginUIState extends State<loginUI> {
     }
   }
 
+  getWifi() async{
+    var wifiIPv6 = await info.getWifiIPv6();
+  }
 
   @override
   void initState() {
@@ -219,6 +224,7 @@ class loginButton extends StatelessWidget {
 
     void showSnackBar(BuildContext context, result) {
       final snackBar = SnackBar(
+        duration: Duration(milliseconds: 800),
         content: Text(result, textAlign: TextAlign.center, style: style.normalText),
         backgroundColor: Colors.black.withOpacity(0.8),
         behavior: SnackBarBehavior.floating,
@@ -235,7 +241,6 @@ class loginButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: ()async{
           var toEmailID = '${textFieldID + '@studyallcare.com'}';
-          print(toEmailID);
           try {
             await auth.signInWithEmailAndPassword(
                 email: toEmailID,

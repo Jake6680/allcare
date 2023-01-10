@@ -44,7 +44,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'Daily Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
+  var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'English Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
   var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch;
 
   void showSnackBar(BuildContext context, result) {
@@ -71,7 +71,6 @@ class _MyAppState extends State<MyApp> {
         fireDataAlertDetail = result['content'];
       });
     }catch(e){
-      print(e);
       showSnackBar(context, '알수없는 오류');
     }
   }
