@@ -2,6 +2,8 @@ import 'package:allcare/pages/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 
 import '../style.dart' as style;
 
@@ -59,13 +61,17 @@ class _loginUIState extends State<loginUI> {
       }
     if (loginDataed == true) {
       Future((){
+        FlutterNativeSplash.remove();
       Navigator.of(context).pushNamedAndRemoveUntil(
           '/home', (Route<dynamic> route) => false);
       });
     } else if (fireLoginLevel == true) {
+      FlutterNativeSplash.remove();
       Future((){
         showSnackBar(context, '로그인 실패');
       });
+    } else {
+      FlutterNativeSplash.remove();
     }
   }
 
@@ -80,7 +86,6 @@ class _loginUIState extends State<loginUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         centerTitle: true,
         title: Row(
@@ -90,7 +95,6 @@ class _loginUIState extends State<loginUI> {
           ],
         ),
       ),
-
       body: loginBody(),
     );
   }
@@ -98,7 +102,8 @@ class _loginUIState extends State<loginUI> {
 
 
 class loginBody extends StatefulWidget {
-  const loginBody({Key? key}) : super(key: key);
+  loginBody({Key? key, this.loginLoading}) : super(key: key);
+  final loginLoading;
 
   @override
   State<loginBody> createState() => _loginBodyState();
@@ -118,6 +123,7 @@ class _loginBodyState extends State<loginBody> {
       textFieldPW = text;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -130,7 +136,7 @@ class _loginBodyState extends State<loginBody> {
           loginWidget( getlonginID : getlonginID ),
           pwWidget( getlonginPW : getlonginPW ),
           loginButton( textFieldID: textFieldID , textFieldPW: textFieldPW) ,
-          bottomTextButton()
+          bottomTextButton(),
         ],
       ),
     );

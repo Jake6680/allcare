@@ -37,9 +37,7 @@ class _letterUIState extends State<letterUI> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      getUserContent();
-    });
+    getUserContent();
   }
 
 
@@ -167,7 +165,8 @@ class _checkLetterState extends State<checkLetter> {
             await firestore.collection('letter').add({'name' : fireDataName,'content' : widget.letterData});
           }catch(e) {
             showSnackBar(context, '알수없는 오류');
-            Navigator.pushNamed(context, '/home');
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                '/home', (Route<dynamic> route) => false);
             setState(() {
               sendErrorLevel = true;
             });
@@ -176,7 +175,8 @@ class _checkLetterState extends State<checkLetter> {
             Future((){
               removeUserContent();
               showSnackBar(context, '성공');
-              Navigator.pushNamed(context, '/home');
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/home', (Route<dynamic> route) => false);
             });
           };
         },

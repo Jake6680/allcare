@@ -14,6 +14,7 @@ class registerUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+
     void showSnackBar(BuildContext context, result) {
         final snackBar = SnackBar(
           content: Text(result, textAlign: TextAlign.center, style: style.normalText),
@@ -46,6 +47,10 @@ class _registerBodyState extends State<registerBody> {
   var textLoginMap = {};
   var textLoginCode;
   bool errorLevel = false;
+
+  getTextLoginMap(name){
+      return textLoginMap[name];
+  }
 
   sendDataWidge(name, content){
     setState(() {
@@ -95,7 +100,7 @@ class _registerBodyState extends State<registerBody> {
             }else if (viewList[index] == '버튼'){
               return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar );
             }else {
-            return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge );
+            return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap );
             }
           },childCount: viewList.length
           ),)
@@ -107,10 +112,18 @@ class _registerBodyState extends State<registerBody> {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class registerNoneWidget extends StatelessWidget {
-  const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge}) : super(key: key);
+class registerNoneWidget extends StatefulWidget {
+  const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap}) : super(key: key);
   final viewList;
   final sendDataWidge;
+  final getTextLoginMap;
+  @override
+  State<registerNoneWidget> createState() => _registerNoneWidgetState();
+}
+
+class _registerNoneWidgetState extends State<registerNoneWidget> {
+  var errorMessage = '';
+  var checkBox = {};
 
   @override
   Widget build(BuildContext context) {
@@ -121,16 +134,33 @@ class registerNoneWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(viewList, style: style.registerNormalText,),
-              Text('*',style: style.registerRedText,),
+              Text(widget.viewList, style: style.registerNormalText,),
+              Text('*', style: style.registerRedText,),
+              Container(
+                  padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: Text(errorMessage, style: style.registerRedText2)
+              )
             ],
           ),
           TextField(
-              obscureText: viewList == '비밀번호' || viewList == '비밀번호확인' ? true : false,
-              textInputAction: viewList == '확인코드' ? TextInputAction.done : TextInputAction.next,
+            decoration: InputDecoration(
+                suffix: Icon(Icons.check,color: Colors.green, size: checkBox[widget.viewList] == true ? 20 : 0,)
+            ),
+              obscureText: widget.viewList == '비밀번호' || widget.viewList == '비밀번호확인' ? true : false,
+              textInputAction: widget.viewList == '확인코드' ? TextInputAction.done : TextInputAction.next,
             onChanged: (text){
-                if (viewList != '비밀번호확인') {
-                  sendDataWidge(viewList, text);
+                if (widget.viewList != '비밀번호확인') {
+                  widget.sendDataWidge(widget.viewList, text);
+                }else if (widget.getTextLoginMap('비밀번호') != text){
+                  setState(() {
+                    errorMessage = '비밀번호가 일치하지않습니다.';
+                    checkBox = {widget.viewList : false};
+                  });
+                }else{
+                  setState(() {
+                    errorMessage = '';
+                    checkBox = {widget.viewList : true};
+                  });
                 }
             },
           )

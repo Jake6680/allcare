@@ -33,4 +33,5 @@ final loginTextField = UnderlineInputBorder( borderSide: BorderSide(width: 2, co
 final textFieldLabel = TextStyle( color: Colors.grey, fontWeight: FontWeight.w500 );
 final registerNormalText = TextStyle(fontWeight: FontWeight.bold);
 final registerRedText = TextStyle(color: Colors.red);
+final registerRedText2 = TextStyle(color: Colors.red, fontWeight: FontWeight.w500);
 final registerDropBoxboder = BoxDecoration(border: Border.all(width: 1, color: Colors.black));
