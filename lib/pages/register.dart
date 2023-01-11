@@ -21,7 +21,7 @@ class registerUI extends StatelessWidget {
           backgroundColor: Colors.black.withOpacity(0.8),
           behavior: SnackBarBehavior.floating,
           shape: StadiumBorder(),
-          width: result == '다시확인해주세요.' ? 200 : result == '성공' ? 100 : 200,
+          width: result == '전화번호를 입력해주세요.' ? 300 : result == '다시확인해주세요.' ? 200 : result == '성공' ? 100 : 200,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -43,11 +43,11 @@ class registerBody extends StatefulWidget {
 
 class _registerBodyState extends State<registerBody> {
   TextEditingController registerID = TextEditingController();
-  var viewList = ['아이디', '비밀번호', '비밀번호 확인','이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
+  var viewList = ['아이디', '비밀번호', '비밀번호 확인', '이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
   var textLoginMap = {};
   var textLoginCode;
   var fireDataID = [];
-  var textFiedlState = [];
+  var textFiedlState = {};
   bool errorLevel = false;
 
   getTextLoginMap(name){
@@ -57,7 +57,13 @@ class _registerBodyState extends State<registerBody> {
   sendDataWidge(name, content, boolState){
     setState(() {
       textLoginMap[name] = content;
-      textFiedlState.add(boolState);
+      textFiedlState[name] = boolState;
+    });
+  }
+
+  sendTextState(boolState){
+    setState(() {
+      textFiedlState['비밀번호 확인'] = boolState;
     });
   }
 
@@ -112,7 +118,7 @@ class _registerBodyState extends State<registerBody> {
             }else if (viewList[index] == '버튼'){
               return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar, textFiedlState: textFiedlState );
             }else {
-            return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap );
+            return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap, sendTextState : sendTextState );
             }
           },childCount: viewList.length
           ),)
@@ -213,10 +219,11 @@ class _registerIDWidgetState extends State<registerIDWidget> {
 
 
 class registerNoneWidget extends StatefulWidget {
-  const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap}) : super(key: key);
+  const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap, this.sendTextState}) : super(key: key);
   final viewList;
   final sendDataWidge;
   final getTextLoginMap;
+  final sendTextState;
 
   @override
   State<registerNoneWidget> createState() => _registerNoneWidgetState();
@@ -258,26 +265,28 @@ class _registerNoneWidgetState extends State<registerNoneWidget> {
               textInputAction: widget.viewList == '확인코드' ? TextInputAction.done : TextInputAction.next,
             onChanged: (text){
                 if (widget.viewList != '비밀번호 확인') {
-                  if (widget.viewList == '비밀번호'){
-                    if (text.length < 6){
+                  if (widget.viewList == '비밀번호') {
+                    if (text.length < 6) {
                       widget.sendDataWidge(widget.viewList, text, false);
-                      errorCheckFuction(widget.viewList, '비밀번호는 6자(영문 기준) 이상이어야 합니다.', false);
-                    }else{
+                      errorCheckFuction(
+                          widget.viewList, '비밀번호는 6자(영문 기준) 이상이어야 합니다.', false);
+                    } else {
                       widget.sendDataWidge(widget.viewList, text, true);
                       errorCheckFuction(widget.viewList, '', true);
                     }
-                  }else if (widget.viewList == '확인 코드'){
+                  } else if (widget.viewList == '확인 코드') {
                     widget.sendDataWidge(widget.viewList, text, true);
                     errorCheckFuction(widget.viewList, '', null);
-                  }else {
+                  } else {
                     widget.sendDataWidge(widget.viewList, text, true);
                     errorCheckFuction(widget.viewList, '', true);
                   }
-                }
-                if (widget.viewList == '비밀번호 확인') {
+                }else {
                   if (widget.getTextLoginMap('비밀번호') != text) {
+                    widget.sendTextState(false);
                     errorCheckFuction(widget.viewList, '비밀번호가 일치하지않습니다.', false);
-                  }else{
+                  } else{
+                    widget.sendTextState(true);
                     errorCheckFuction(widget.viewList, '', true);
                   }
                 }
@@ -324,7 +333,11 @@ class _registerTelephonWidgetState extends State<registerTelephonWidget> {
                 suffix: textValue == 11 ? Icon(Icons.check,color: Colors.green, size: 20,) : Text("${textValue ?? '0'} / 11")
             ),
             onChanged: (text){
-              widget.sendDataWidge('전화번호', text, true);
+              if (text.length < 9){
+                widget.sendDataWidge('전화번호', text, false);
+              }else {
+                widget.sendDataWidge('전화번호', text, true);
+              }
               setState(() {
                 textValue = text.length;
                 if (text.length == 11){FocusScope.of(context).nextFocus();}
@@ -477,7 +490,7 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
 
   @override
   Widget build(BuildContext context) {
-    String toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
+    String toEmail = '${widget.textLoginMap['ID']}@studyallcare.com';
     var toNewMap = {
       'pw' : widget.textLoginMap['비밀번호'],
       'uid' : 'Error',
@@ -499,8 +512,23 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
           if (widget.textLoginCode != widget.textLoginMap['확인 코드'] || widget.textLoginCode == null){
             showDialog(context: context, builder: (context) => failDialog( failContent : '확인코드가 일치하지않습니다.' ) );
             }else {
-              print(widget.textFiedlState);
-            if (widget.textLoginMap['학업'] == '고등부'){  //고등학생일시 부모님 전화번호 입력
+              if( widget.textLoginMap['ID'] == null || widget.textFiedlState['ID'] == false){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '아이디 중복 체크를 해주세요.' ) );
+              }else if( widget.textLoginMap['비밀번호'] == null || widget.textFiedlState['비밀번호'] == false){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '비밀번호를 제대로 입력해주세요.' ) );
+              }else if( widget.textFiedlState['비밀번호 확인'] == false || widget.textFiedlState['비밀번호 확인'] == null){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '비밀번호 확인란에 비밀번호를 똑같이 입력해주세요.' ) );
+              }else if( widget.textLoginMap['이름'] == '' || widget.textLoginMap['이름'] == null || widget.textFiedlState['이름'] == false){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '이름을 제대로 입력해주세요.' ) );
+              }else if( widget.textLoginMap['전화번호'] == null || widget.textFiedlState['전화번호'] == false){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '전화번호를 제대로 입력해주세요.' ) );
+              }else if( widget.textLoginMap['자리번호'] == null ){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '자리번호를 선택해주세요.' ) );
+              }else if( widget.textLoginMap['자리번호_seat'] == '' || widget.textLoginMap['자리번호_seat'] == null || widget.textFiedlState['자리번호_seat'] == false){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '자리번호를 제대로 입력해주세요.' ) );
+              }else if( widget.textLoginMap['학업'] == null){
+                showDialog(context: context, builder: (context) => failDialog( failContent : '학업을 선택해주세요.' ) );
+              }else if (widget.textLoginMap['학업'] == '고등부'){  //고등학생일시 부모님 전화번호 입력
               showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
             }else{  //아닐시 그냥 회원가입 시도!
               try {
@@ -512,7 +540,7 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
                   toNewMap['uid'] = result.user!.uid;
                 });
                 await firestore.collection('customer').add(toNewMap);
-                await firestore.collection('contact').add({'ID' : widget.textLoginMap['아이디']});
+                await firestore.collection('contact').add({'ID' : widget.textLoginMap['ID']});
               } catch (e) {
                 widget.showSnackBar(context, '다시확인해주세요.');
                 setState(() {
@@ -559,7 +587,7 @@ class _parentDialogState extends State<parentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var toEmail = '${widget.textLoginMap['아이디']}@studyallcare.com';
+    var toEmail = '${widget.textLoginMap['ID']}@studyallcare.com';
     return AlertDialog(
       title: Text('보호자 전화번호', style: style.normalTextDark),
       shape: style.dialogCheckButton,
@@ -571,7 +599,7 @@ class _parentDialogState extends State<parentDialog> {
         decoration: InputDecoration(
             hintText: '010-1234-5678',
             counterText: "",
-            suffix: Text("${textValue ?? '0'} / 11")
+            suffix: textValue == 11 ? Icon(Icons.check,color: Colors.green, size: 20,) : Text("${textValue ?? '0'} / 11")
         ),
         onChanged: (text){
           setState(() {
@@ -584,29 +612,37 @@ class _parentDialogState extends State<parentDialog> {
       actions: [
         ElevatedButton(
           onPressed: () async{
-            try {
-              var result = await auth.createUserWithEmailAndPassword(
-                email: toEmail,
-                password: widget.textLoginMap['비밀번호'],
-              );
-              setState(() {
-                widget.toNewMap['parent'] = parentContact;
-                widget.toNewMap['uid'] = result.user!.uid;
-              });
-              await firestore.collection('customer').add(widget.toNewMap);
-            } catch (e) {
-              widget.showSnackBar(context, '다시확인해주세요.');
-              setState(() {
-                errorCheck = true;
-              });
-            }
-            if (errorCheck != true) {
-              Future(() {
-                widget.showSnackBar(context, '성공');
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
-              });
-            }else{
-              Future((){Navigator.pop(context);});
+            if (parentContact == '' || parentContact == null || parentContact.length < 9){
+              widget.showSnackBar(context, '전화번호를 입력해주세요.');
+            }else {
+              try {
+                var result = await auth.createUserWithEmailAndPassword(
+                  email: toEmail,
+                  password: widget.textLoginMap['비밀번호'],
+                );
+                setState(() {
+                  widget.toNewMap['parent'] = parentContact;
+                  widget.toNewMap['uid'] = result.user!.uid;
+                });
+                await firestore.collection('customer').add(widget.toNewMap);
+                await firestore.collection('contact').add({'ID' : widget.textLoginMap['ID']});
+              } catch (e) {
+                widget.showSnackBar(context, '다시확인해주세요.');
+                setState(() {
+                  errorCheck = true;
+                });
+              }
+              if (errorCheck != true) {
+                Future(() {
+                  widget.showSnackBar(context, '성공');
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/', (Route<dynamic> route) => false);
+                });
+              } else {
+                Future(() {
+                  Navigator.pop(context);
+                });
+              }
             }
           },
           style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),

@@ -9,7 +9,8 @@ final auth = FirebaseAuth.instance;
 
 
 class letterUI extends StatefulWidget {
-  letterUI({Key? key}) : super(key: key);
+  letterUI({Key? key, this.fireDataName}) : super(key: key);
+  final fireDataName;
 
   @override
   State<letterUI> createState() => _letterUIState();
@@ -46,7 +47,7 @@ class _letterUIState extends State<letterUI> {
     return Scaffold(
 
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: (){ showDialog(context: context, builder: (context) => sendDialog(letterData : letterData.text) );},
+          onPressed: (){ showDialog(context: context, builder: (context) => sendDialog(letterData : letterData.text, fireDataName : widget.fireDataName) );},
           label: Text('보내기', style: style.floatingText),
           icon: Icon(Icons.outgoing_mail, color: Colors.white, size: 30),
           backgroundColor: Color(0xff0B01A2),
@@ -82,8 +83,9 @@ class _letterUIState extends State<letterUI> {
 
 
 class sendDialog extends StatelessWidget {
-  sendDialog({Key? key, this.letterData}) : super(key: key);
+  sendDialog({Key? key, this.letterData, this.fireDataName}) : super(key: key);
   final letterData;
+  final fireDataName;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +93,7 @@ class sendDialog extends StatelessWidget {
       child: ((){if (letterData == '') {
         return cancelLetter();
       }else{
-        return checkLetter( letterData : letterData );
+        return checkLetter( letterData : letterData, fireDataName : fireDataName );
       }
       })(),
     );
@@ -120,8 +122,9 @@ class cancelLetter extends StatelessWidget {
 
 
 class checkLetter extends StatefulWidget {
-  checkLetter({Key? key, this.letterData}) : super(key: key);
+  checkLetter({Key? key, this.letterData, this.fireDataName}) : super(key: key);
   final letterData;
+  final fireDataName;
 
   @override
   State<checkLetter> createState() => _checkLetterState();
@@ -129,7 +132,6 @@ class checkLetter extends StatefulWidget {
 
 class _checkLetterState extends State<checkLetter> {
   bool sendErrorLevel = false;
-  var fireDataName;
 
   removeUserContent() async {
     var content = await SharedPreferences.getInstance();
@@ -157,12 +159,7 @@ class _checkLetterState extends State<checkLetter> {
       actions: [
         ElevatedButton(onPressed: () async{
           try{
-            await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
-              setState(() {
-                fireDataName = docName['name'];
-              });
-            }});
-            await firestore.collection('letter').add({'name' : fireDataName,'content' : widget.letterData});
+            await firestore.collection('letter').add({'name' : widget.fireDataName,'content' : widget.letterData, 'time' : DateTime.now()});
           }catch(e) {
             showSnackBar(context, '알수없는 오류');
             Navigator.of(context).pushNamedAndRemoveUntil(

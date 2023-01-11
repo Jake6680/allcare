@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
       child: Scaffold(
         floatingActionButton:
         FloatingActionButton.extended(
-          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI() ));},
+          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI(fireDataName : fireDataName) ));},
           label: Text('익명 편지', style: style.floatingText),
           icon: Icon(Icons.mail, color: Colors.white, size: 30),
           backgroundColor: Color(0xff0B01A2),
