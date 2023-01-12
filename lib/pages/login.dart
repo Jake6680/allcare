@@ -77,9 +77,6 @@ class _loginUIState extends State<loginUI> {
     }
   }
 
-  getWifi() async{
-    var wifiIPv6 = await info.getWifiIPv6();
-  }
 
   @override
   void initState() {

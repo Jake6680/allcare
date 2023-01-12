@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:animated_overflow/animated_overflow.dart';
 import 'package:flutter/cupertino.dart';
 import 'notification.dart';
@@ -14,6 +12,7 @@ import './pages/login.dart';
 import './style.dart' as style;
 import './pages/letter.dart';
 import './pages/notice.dart';
+import './pages/attendance.dart';
 
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
@@ -45,7 +44,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'English Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
-  var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch;
+  var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch; var fireDataSeat;
 
   void showSnackBar(BuildContext context, result) {
     final snackBar = SnackBar(
@@ -63,6 +62,7 @@ class _MyAppState extends State<MyApp> {
       await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
       setState(() {
         fireDataName = docName['name'];
+        fireDataSeat = docName['seat'];
       });
       }});
       var result = await firestore.collection('Code').doc('alertID').get();
@@ -130,13 +130,69 @@ class _MyAppState extends State<MyApp> {
               itemBuilder: (c, i) {
                 if (i == 0) {
                   return fireDataAlertSwitch == true ? noticeAlert(fireDataAlertDetail: fireDataAlertDetail) : Container();
-                } else {
+                } else if (buttonName[i - 1] == '출석체크'){
+                  return Container(
+                    margin: EdgeInsets.fromLTRB(13, 0, 13, 15),
+                    height: 57,
+                    child: Row(
+                      children: [
+                        Flexible(
+                          flex: 7,
+                          fit: FlexFit.tight,
+                          child: SizedBox(
+                            height: 70,
+                            child: ElevatedButton(
+                            onPressed: () {
+                             showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'attendance' ));
+                            },
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all(
+                                  style.dialogCheckButton
+                              )
+                            ),
+                            child: Text(
+                              '등원 하기', style: style.normalText,),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                            fit: FlexFit.tight,
+                            child: SizedBox()),
+                        Flexible(
+                          flex: 7,
+                          fit: FlexFit.tight,
+                          child: SizedBox(
+                            height: 70,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'backHome' ));
+                              },
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      style.dialogCheckButton
+                                  ),
+                                  backgroundColor: MaterialStateProperty.all(Colors.red)
+                              ),
+                              child: Text(
+                                '하원 하기', style: style.normalText,),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                }else {
                   return ListTile(
                     title: Container(
                       margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
                       height: 57,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (buttonName[i - 1] == '출석체크'){showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat)); }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: buttonName[i - 1] == '하원 하기' ? MaterialStateProperty.all(Colors.red) : MaterialStateProperty.all(Color(0xff0B01A2))
+                        ),
                         child: Text(
                           buttonName[i - 1], style: style.normalText,),
                       ),

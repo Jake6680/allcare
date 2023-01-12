@@ -528,7 +528,7 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
                 showDialog(context: context, builder: (context) => failDialog( failContent : '자리번호를 제대로 입력해주세요.' ) );
               }else if( widget.textLoginMap['학업'] == null){
                 showDialog(context: context, builder: (context) => failDialog( failContent : '학업을 선택해주세요.' ) );
-              }else if (widget.textLoginMap['학업'] == '고등부'){  //고등학생일시 부모님 전화번호 입력
+              }else if (widget.textLoginMap['학업'] == '고등부' || widget.textLoginMap['학업'] == '재수'){  //고등학생or 재수 일시 부모님 전화번호 입력
               showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
             }else{  //아닐시 그냥 회원가입 시도!
               try {
@@ -589,7 +589,7 @@ class _parentDialogState extends State<parentDialog> {
   Widget build(BuildContext context) {
     var toEmail = '${widget.textLoginMap['ID']}@studyallcare.com';
     return AlertDialog(
-      title: Text('보호자 전화번호', style: style.normalTextDark),
+      title: Text(widget.textLoginMap['학업'] == '재수' ? '보호자 전화번호(선택사항)' : '보호자 전화번호', style: style.normalTextDark),
       shape: style.dialogCheckButton,
       content: TextField(
         maxLength: 11,
@@ -612,7 +612,38 @@ class _parentDialogState extends State<parentDialog> {
       actions: [
         ElevatedButton(
           onPressed: () async{
-            if (parentContact == '' || parentContact == null || parentContact.length < 9){
+            if (widget.textLoginMap['학업'] == '재수'){
+                try {
+                  var result = await auth.createUserWithEmailAndPassword(
+                    email: toEmail,
+                    password: widget.textLoginMap['비밀번호'],
+                  );
+                  setState(() {
+                    if (parentContact != '' && parentContact != null) {
+                      widget.toNewMap['parent'] = parentContact;
+                    }
+                    widget.toNewMap['uid'] = result.user!.uid;
+                  });
+                  await firestore.collection('customer').add(widget.toNewMap);
+                  await firestore.collection('contact').add({'ID' : widget.textLoginMap['ID']});
+                } catch (e) {
+                  widget.showSnackBar(context, '다시확인해주세요.');
+                  setState(() {
+                    errorCheck = true;
+                  });
+                }
+                if (errorCheck != true) {
+                  Future(() {
+                    widget.showSnackBar(context, '성공');
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/', (Route<dynamic> route) => false);
+                  });
+                } else {
+                  Future(() {
+                    Navigator.pop(context);
+                  });
+                }
+            }else if (parentContact == '' || parentContact == null || parentContact.length < 9){
               widget.showSnackBar(context, '전화번호를 입력해주세요.');
             }else {
               try {
