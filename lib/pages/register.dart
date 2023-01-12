@@ -56,7 +56,15 @@ class _registerBodyState extends State<registerBody> {
 
   sendDataWidge(name, content, boolState){
     setState(() {
-      textLoginMap[name] = content;
+      if (name == '자리번호'){
+        if (content == '1관'){
+          textLoginMap[name] = '1';
+        } else{
+          textLoginMap[name] = '2';
+        }
+      }else{
+        textLoginMap[name] = content;
+      }
       textFiedlState[name] = boolState;
     });
   }

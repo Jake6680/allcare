@@ -1,3 +1,4 @@
+import 'package:allcare/pages/leave.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_overflow/animated_overflow.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,12 +8,14 @@ import 'package:allcare/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import './pages/login.dart';
 import './style.dart' as style;
 import './pages/letter.dart';
 import './pages/notice.dart';
 import './pages/attendance.dart';
+
 
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
@@ -24,12 +27,22 @@ void main() async{
 
   runApp(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: style.theme,
         initialRoute: '/',
         routes: {
           '/': (context) => loginUI(),
           '/home': (context) => MyApp(),
         },
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('ko', 'KR'),
+          // include country code too
+        ],
       )
   );
 }
@@ -43,7 +56,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var buttonName = ['출석체크', '조퇴/외출/결석', '도시락 신청', 'English Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
+  var buttonName = ['출석체크', '외출/조퇴/결석', '외출(고정)', '도시락 신청', 'English Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
   var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch; var fireDataSeat;
 
   void showSnackBar(BuildContext context, result) {
@@ -132,7 +145,7 @@ class _MyAppState extends State<MyApp> {
                   return fireDataAlertSwitch == true ? noticeAlert(fireDataAlertDetail: fireDataAlertDetail) : Container();
                 } else if (buttonName[i - 1] == '출석체크'){
                   return Container(
-                    margin: EdgeInsets.fromLTRB(13, 0, 13, 15),
+                    margin: EdgeInsets.fromLTRB(13, 0, 13, 20),
                     height: 57,
                     child: Row(
                       children: [
@@ -188,7 +201,9 @@ class _MyAppState extends State<MyApp> {
                       height: 57,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (buttonName[i - 1] == '출석체크'){showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat)); }
+                          if (buttonName[i - 1] == '외출/조퇴/결석'){
+                            Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveUI( fireDataSeat : fireDataSeat) ));
+                          }
                         },
                         style: ButtonStyle(
                           backgroundColor: buttonName[i - 1] == '하원 하기' ? MaterialStateProperty.all(Colors.red) : MaterialStateProperty.all(Color(0xff0B01A2))

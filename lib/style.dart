@@ -17,7 +17,7 @@ ThemeData theme = ThemeData(
 
 );
 
-final barText = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500);
+final barText = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500, fontSize: 14);
 final normalText = TextStyle(color:Color(0xffffffff), fontSize: 20, fontWeight: FontWeight.w600 );
 final normalTextDark = TextStyle(color:Color(0xff000000), fontSize: 20, fontWeight: FontWeight.w600 );
 final normalTextRed = TextStyle(color:Colors.red, fontSize: 20, fontWeight: FontWeight.w600 );
@@ -26,7 +26,10 @@ final letterMainText = TextStyle( fontSize: 18, fontWeight: FontWeight.w400 );
 final dialogCheckButton = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)));
 final dialogCheckText = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
 final dropDownBoxText = TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black);
+final dateSelecter = TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black);
+final dateSelecterFix = TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey);
 final speakerText = TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold);
+final described = TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey);
 final noticeIconText = TextStyle(fontSize: 10,fontWeight: FontWeight.w600);
 final h1 = TextStyle( fontWeight: FontWeight.bold, fontSize: 30 );
 final loginTextField = UnderlineInputBorder( borderSide: BorderSide(width: 2, color: Colors.black));

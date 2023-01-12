@@ -8,8 +8,6 @@ import '../style.dart' as style;
 final firestore = FirebaseFirestore.instance;
 final info = NetworkInfo();
 
-FirebaseDatabase database = FirebaseDatabase.instance;
-
 class attendanceCheck extends StatefulWidget {
   const attendanceCheck({Key? key, this.fireDataSeat, this.buttonState}) : super(key: key);
   final fireDataSeat;
@@ -86,7 +84,7 @@ class _attendanceCheckState extends State<attendanceCheck> {
             });
           }else{
             try{
-              final ref = FirebaseDatabase.instance.ref(widget.fireDataSeat['place']).child('${widget.fireDataSeat['number']}번');
+              final ref = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}');
               await ref.set({
                 'state': widget.buttonState
               });

@@ -175,7 +175,7 @@ class _checkLetterState extends State<checkLetter> {
               Navigator.of(context).pushNamedAndRemoveUntil(
                   '/home', (Route<dynamic> route) => false);
             });
-          };
+          }
         },
             style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
             child: Text('보내기', style: style.dialogCheckText)
