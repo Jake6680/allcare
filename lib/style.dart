@@ -39,3 +39,4 @@ const registerRedText = TextStyle(color: Colors.red);
 const registerRedText2 = TextStyle(color: Colors.red, fontWeight: FontWeight.w500);
 final registerDropBoxboder = BoxDecoration(border: Border.all(width: 1, color: Colors.black));
 const suffixElevatedButton = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+const listVeiwhirghitText = TextStyle(fontSize: 17);

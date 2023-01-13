@@ -29,7 +29,7 @@ void showSnackBar(BuildContext context, result) {
     backgroundColor: Colors.black.withOpacity(0.8),
     behavior: SnackBarBehavior.floating,
     shape: StadiumBorder(),
-    width: result == '전화번호를 입력해주세요.' ? 300 : result == '다시확인해주세요.' ? 200 : result == '성공' ? 100 : 200,
+    width: result.lengh < 5 ? 100 : result.lengh < 10 ? 200 : 300,
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

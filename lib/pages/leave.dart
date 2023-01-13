@@ -4,6 +4,7 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import '../style.dart' as style;
+import './leavelist.dart';
 
 
 class LeaveAddUI extends StatefulWidget {
@@ -125,7 +126,6 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           }, child: Text('보내기', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
-                        Text('변경사항이 있으시면 원장 또는 총무에게 문의해주세요.',style: style.described),
                       ],
                     ),
                   ),
@@ -174,7 +174,6 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           }, child: Text('보내기', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
-                        Text('변경사항이 있으시면 원장 또는 총무에게 문의해주세요.',style: style.described),
                       ],
                     ),
                   ),
@@ -249,7 +248,6 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           }, child: Text('보내기', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
-                        Text('변경사항이 있으시면 원장 또는 총무에게 문의해주세요.',style: style.described),
                       ],
                     ),
                   ),
@@ -411,8 +409,8 @@ class _CheckDialogState extends State<CheckDialog> {
               });
             }
           }catch(e) {
-            showSnackBar(context, '알수없는 오류');
             Navigator.pop(context);
+            showSnackBar(context, '알수없는 오류');
             setState(() {
               sendErrorLevel = true;
             });
@@ -420,8 +418,7 @@ class _CheckDialogState extends State<CheckDialog> {
           if (sendErrorLevel != true){
             Future((){
               showSnackBar(context, widget.backHomeType == 'leaveEarly' || widget.backHomeType == 'absent' ? '원장님에게 문자도 남겨주세요!' : '저장 완료');
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/home', (Route<dynamic> route) => false);
+              Navigator.pop(context);
             });
           }
         },

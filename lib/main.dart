@@ -90,9 +90,11 @@ class _MyAppState extends State<MyApp> {
       final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}/state');
       final snapshot = await refGet.get();
       if (snapshot.exists) {
-        Future((){
-          showSnackBar(context, '현재 학원에 ${snapshot.value == 'attendance' ? '등원' : '하원'}된 상태입니다.');
-        });
+        if (snapshot.value == 'backHome'){
+          Future((){
+            showSnackBar(context, '현재 학원에 하원된 상태입니다.');
+          });
+        }
       }
     }catch(e){
       showSnackBar(context, '알수없는 오류');
