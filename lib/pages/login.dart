@@ -1,22 +1,23 @@
-import 'package:allcare/pages/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:network_info_plus/network_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../style.dart' as style;
+import 'package:allcare/pages/register.dart';
 
-final info = NetworkInfo();
+final authLogin = FirebaseAuth.instance;
 
-class loginUI extends StatefulWidget {
-  loginUI({Key? key}) : super(key: key);
+
+class LoginUI extends StatefulWidget {
+  const LoginUI({Key? key}) : super(key: key);
 
   @override
-  State<loginUI> createState() => _loginUIState();
+  State<LoginUI> createState() => _LoginUIState();
 }
 
-class _loginUIState extends State<loginUI> {
+class _LoginUIState extends State<LoginUI> {
   bool loginDataed = false;
   bool fireLoginLevel = false;
 
@@ -38,7 +39,7 @@ class _loginUIState extends State<loginUI> {
     var userPW = content.getString('userPW');
       if (userID != null && userPW != null) {
         try {
-          await auth.signInWithEmailAndPassword(
+          await authLogin.signInWithEmailAndPassword(
               email: userID,
               password: userPW
           );
@@ -97,21 +98,21 @@ class _loginUIState extends State<loginUI> {
           ],
         ),
       ),
-      body: loginBody(),
+      body: LoginBody(),
     );
   }
 }
 
 
-class loginBody extends StatefulWidget {
-  loginBody({Key? key, this.loginLoading}) : super(key: key);
+class LoginBody extends StatefulWidget {
+  const LoginBody({Key? key, this.loginLoading}) : super(key: key);
   final loginLoading;
 
   @override
-  State<loginBody> createState() => _loginBodyState();
+  State<LoginBody> createState() => _LoginBodyState();
 }
 
-class _loginBodyState extends State<loginBody> {
+class _LoginBodyState extends State<LoginBody> {
   var textFieldID;
   var textFieldPW;
 
@@ -135,10 +136,10 @@ class _loginBodyState extends State<loginBody> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('로그인', style: style.h1),
-          loginWidget( getlonginID : getlonginID ),
-          pwWidget( getlonginPW : getlonginPW ),
-          loginButton( textFieldID: textFieldID , textFieldPW: textFieldPW) ,
-          bottomTextButton(),
+          LoginWidget( getlonginID : getlonginID ),
+          PWWidget( getlonginPW : getlonginPW ),
+          LoginButton( textFieldID: textFieldID , textFieldPW: textFieldPW) ,
+          BottomTextButton(),
         ],
       ),
     );
@@ -149,8 +150,8 @@ class _loginBodyState extends State<loginBody> {
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-class loginWidget extends StatelessWidget {
-  const loginWidget({Key? key, this.getlonginID}) : super(key: key);
+class LoginWidget extends StatelessWidget {
+  const LoginWidget({Key? key, this.getlonginID}) : super(key: key);
   final getlonginID;
 
   @override
@@ -176,11 +177,9 @@ class loginWidget extends StatelessWidget {
 
 
 
-class pwWidget extends StatelessWidget {
-  pwWidget({Key? key, this.getlonginPW}) : super(key: key);
+class PWWidget extends StatelessWidget {
+  const PWWidget({Key? key, this.getlonginPW}) : super(key: key);
   final getlonginPW;
-  bool errorLevel = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -203,8 +202,8 @@ class pwWidget extends StatelessWidget {
 
 
 
-class loginButton extends StatelessWidget {
-  const loginButton({Key? key, this.textFieldID, this.textFieldPW}) : super(key: key);
+class LoginButton extends StatelessWidget {
+  const LoginButton({Key? key, this.textFieldID, this.textFieldPW}) : super(key: key);
   final textFieldID;
   final textFieldPW;
 
@@ -239,7 +238,7 @@ class loginButton extends StatelessWidget {
         onPressed: ()async{
           var toEmailID = '${textFieldID + '@studyallcare.com'}';
           try {
-            await auth.signInWithEmailAndPassword(
+            await authLogin.signInWithEmailAndPassword(
                 email: toEmailID,
                 password: textFieldPW
             );
@@ -267,8 +266,8 @@ class loginButton extends StatelessWidget {
 }
 
 
-class bottomTextButton extends StatelessWidget {
-  const bottomTextButton({Key? key}) : super(key: key);
+class BottomTextButton extends StatelessWidget {
+  const BottomTextButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +277,7 @@ class bottomTextButton extends StatelessWidget {
         GestureDetector(
           child: Text('회원가입'),
           onTap: () {
-            Navigator.push(context, CupertinoPageRoute(builder: (c) => registerUI() ));
+            Navigator.push(context, CupertinoPageRoute(builder: (c) => RegisterUI() ));
             },
         ),
         Container(
@@ -287,32 +286,13 @@ class bottomTextButton extends StatelessWidget {
         ),
         GestureDetector(
           child: Text('비밀번호 찾기'),
-          onTap: (){showDialog(context: context, builder: (context) => failDialog());},
+          onTap: (){showDialog(context: context, builder: (context) => FailDialog( failContent : '원장 또는 총무에게 문의해주세요.' ));},
         ),
       ],
     );
   }
 }
 
-
-class failDialog extends StatelessWidget {
-  const failDialog({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('원장 또는 총무에게 문의해주세요.', style: style.normalTextDark),
-      shape: style.dialogCheckButton,
-      actions: [
-        ElevatedButton(
-          onPressed: (){Navigator.pop(context);},
-          style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
-          child: Text('닫기', style: style.dialogCheckText),
-        )
-      ],
-    );
-  }
-}
 
 
 

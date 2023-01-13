@@ -8,15 +8,15 @@ final firestore = FirebaseFirestore.instance;
 final auth = FirebaseAuth.instance;
 
 
-class letterUI extends StatefulWidget {
-  letterUI({Key? key, this.fireDataName}) : super(key: key);
+class LetterUI extends StatefulWidget {
+  const LetterUI({Key? key, this.fireDataName}) : super(key: key);
   final fireDataName;
 
   @override
-  State<letterUI> createState() => _letterUIState();
+  State<LetterUI> createState() => _LetterUIState();
 }
 
-class _letterUIState extends State<letterUI> {
+class _LetterUIState extends State<LetterUI> {
   var letterData = TextEditingController();
 
   setUserContent(text) async{
@@ -47,7 +47,7 @@ class _letterUIState extends State<letterUI> {
     return Scaffold(
 
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: (){ showDialog(context: context, builder: (context) => sendDialog(letterData : letterData.text, fireDataName : widget.fireDataName) );},
+          onPressed: (){ showDialog(context: context, builder: (context) => SendDialog(letterData : letterData.text, fireDataName : widget.fireDataName) );},
           label: Text('보내기', style: style.floatingText),
           icon: Icon(Icons.outgoing_mail, color: Colors.white, size: 30),
           backgroundColor: Color(0xff0B01A2),
@@ -82,8 +82,8 @@ class _letterUIState extends State<letterUI> {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-class sendDialog extends StatelessWidget {
-  sendDialog({Key? key, this.letterData, this.fireDataName}) : super(key: key);
+class SendDialog extends StatelessWidget {
+  const SendDialog({Key? key, this.letterData, this.fireDataName}) : super(key: key);
   final letterData;
   final fireDataName;
 
@@ -91,9 +91,9 @@ class sendDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       child: ((){if (letterData == '') {
-        return cancelLetter();
+        return CancelLetter();
       }else{
-        return checkLetter( letterData : letterData, fireDataName : fireDataName );
+        return CheckLetter( letterData : letterData, fireDataName : fireDataName );
       }
       })(),
     );
@@ -101,8 +101,8 @@ class sendDialog extends StatelessWidget {
 }
 
 
-class cancelLetter extends StatelessWidget {
-  const cancelLetter({Key? key}) : super(key: key);
+class CancelLetter extends StatelessWidget {
+  const CancelLetter({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -121,16 +121,16 @@ class cancelLetter extends StatelessWidget {
 }
 
 
-class checkLetter extends StatefulWidget {
-  checkLetter({Key? key, this.letterData, this.fireDataName}) : super(key: key);
+class CheckLetter extends StatefulWidget {
+  const CheckLetter({Key? key, this.letterData, this.fireDataName}) : super(key: key);
   final letterData;
   final fireDataName;
 
   @override
-  State<checkLetter> createState() => _checkLetterState();
+  State<CheckLetter> createState() => _CheckLetterState();
 }
 
-class _checkLetterState extends State<checkLetter> {
+class _CheckLetterState extends State<CheckLetter> {
   bool sendErrorLevel = false;
 
   removeUserContent() async {

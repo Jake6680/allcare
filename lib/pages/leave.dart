@@ -6,15 +6,15 @@ import 'package:firebase_database/firebase_database.dart';
 import '../style.dart' as style;
 
 
-class LeaveUI extends StatefulWidget {
-  const LeaveUI({Key? key, this.fireDataSeat}) : super(key: key);
+class LeaveAddUI extends StatefulWidget {
+  const LeaveAddUI({Key? key, this.fireDataSeat}) : super(key: key);
   final fireDataSeat;
 
   @override
-  State<LeaveUI> createState() => _LeaveUIState();
+  State<LeaveAddUI> createState() => _LeaveAddUIState();
 }
 
-class _LeaveUIState extends State<LeaveUI> {
+class _LeaveAddUIState extends State<LeaveAddUI> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
   String _valueChanged2 = '';
@@ -346,7 +346,7 @@ class FailDialog extends StatelessWidget {
 
 
 class CheckDialog extends StatefulWidget {
-  CheckDialog({Key? key,this.fireDataSeat , this.backHomeType, this.becauseText , this.clearMessage, this.clearMessage2, this.date, this.startDate, this.endDate}) : super(key: key);
+  const CheckDialog({Key? key,this.fireDataSeat , this.backHomeType, this.becauseText , this.clearMessage, this.clearMessage2, this.date, this.startDate, this.endDate}) : super(key: key);
   final backHomeType;
   final fireDataSeat;
   final date;

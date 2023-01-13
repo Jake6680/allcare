@@ -8,8 +8,8 @@ import '../style.dart' as style;
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
 
-class registerUI extends StatelessWidget {
-  registerUI({Key? key}) : super(key: key);
+class RegisterUI extends StatelessWidget {
+  const RegisterUI({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,21 +27,21 @@ class registerUI extends StatelessWidget {
     }
 
     return Scaffold(
-      body: registerBody( showSnackBar: showSnackBar ),
+      body: RegisterBody( showSnackBar: showSnackBar ),
     );
   }
 }
 
 
-class registerBody extends StatefulWidget {
-  registerBody({Key? key, this.showSnackBar}) : super(key: key);
+class RegisterBody extends StatefulWidget {
+  const RegisterBody({Key? key, this.showSnackBar}) : super(key: key);
   final showSnackBar;
 
   @override
-  State<registerBody> createState() => _registerBodyState();
+  State<RegisterBody> createState() => _RegisterBodyState();
 }
 
-class _registerBodyState extends State<registerBody> {
+class _RegisterBodyState extends State<RegisterBody> {
   TextEditingController registerID = TextEditingController();
   var viewList = ['아이디', '비밀번호', '비밀번호 확인', '이름', '전화번호', '자리번호', '학업', '확인 코드', '버튼'];
   var textLoginMap = {};
@@ -116,17 +116,17 @@ class _registerBodyState extends State<registerBody> {
           itemExtent: 90.0,
           delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
           if (viewList[index] == '아이디'){
-            return registerIDWidget( fireDataID : fireDataID, sendDataWidge : sendDataWidge );
+            return RegisterIDWidget( fireDataID : fireDataID, sendDataWidge : sendDataWidge );
             }else if (viewList[index] == '전화번호'){
-              return registerTelephonWidget( sendDataWidge : sendDataWidge );
+              return RegisterTelephonWidget( sendDataWidge : sendDataWidge );
             }else if(viewList[index] == '자리번호'){
-              return registerSeatWidget( sendDataWidge : sendDataWidge );
+              return RegisterSeatWidget( sendDataWidge : sendDataWidge );
             }else if(viewList[index] == '학업') {
-              return registerKindWidget( sendDataWidge : sendDataWidge );
+              return RegisterKindWidget( sendDataWidge : sendDataWidge );
             }else if (viewList[index] == '버튼'){
-              return registerSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar, textFiedlState: textFiedlState );
+              return RegisterSignUpButton( textLoginCode : textLoginCode, textLoginMap : textLoginMap, showSnackBar : widget.showSnackBar, textFiedlState: textFiedlState );
             }else {
-            return registerNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap, sendTextState : sendTextState );
+            return RegisterNoneWidget( viewList : viewList[index], sendDataWidge : sendDataWidge, getTextLoginMap : getTextLoginMap, sendTextState : sendTextState );
             }
           },childCount: viewList.length
           ),)
@@ -141,16 +141,16 @@ class _registerBodyState extends State<registerBody> {
 
 
 
-class registerIDWidget extends StatefulWidget {
-  const registerIDWidget({Key? key, this.fireDataID, this.sendDataWidge}) : super(key: key);
+class RegisterIDWidget extends StatefulWidget {
+  const RegisterIDWidget({Key? key, this.fireDataID, this.sendDataWidge}) : super(key: key);
   final fireDataID;
   final sendDataWidge;
   
   @override
-  State<registerIDWidget> createState() => _registerIDWidgetState();
+  State<RegisterIDWidget> createState() => _RegisterIDWidgetState();
 }
 
-class _registerIDWidgetState extends State<registerIDWidget> {
+class _RegisterIDWidgetState extends State<RegisterIDWidget> {
   bool overlapCheckBox = false;
   bool checkID = false;
 
@@ -194,7 +194,7 @@ class _registerIDWidgetState extends State<registerIDWidget> {
                   fit: FlexFit.tight,
                   child: ElevatedButton(onPressed: (){
                     if (textFieldID == null){
-                      showDialog(context: context, builder: (context) => failDialog(failContent : '아이디를 입력해주세요.'));
+                      showDialog(context: context, builder: (context) => FailDialog(failContent : '아이디를 입력해주세요.'));
                     } else{
                       for(var textFieldIDCheck in widget.fireDataID){
                         if (textFieldID == textFieldIDCheck){
@@ -208,10 +208,10 @@ class _registerIDWidgetState extends State<registerIDWidget> {
                       });
                       if (overlapCheckBox == false){
                         widget.sendDataWidge('ID', textFieldID, true);
-                        showDialog(context: context, builder: (context) => failDialog(failContent : '사용가능한 아이디입니다.'));
+                        showDialog(context: context, builder: (context) => FailDialog(failContent : '사용가능한 아이디입니다.'));
                         Future((){FocusScope.of(context).nextFocus();});
                       }else{
-                        showDialog(context: context, builder: (context) => failDialog(failContent : '이미 사용중인 아이디입니다.'));
+                        showDialog(context: context, builder: (context) => FailDialog(failContent : '이미 사용중인 아이디입니다.'));
                       }
                     }
                   }, child: Text('중복 체크', style: style.suffixElevatedButton))
@@ -226,18 +226,18 @@ class _registerIDWidgetState extends State<registerIDWidget> {
 
 
 
-class registerNoneWidget extends StatefulWidget {
-  const registerNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap, this.sendTextState}) : super(key: key);
+class RegisterNoneWidget extends StatefulWidget {
+  const RegisterNoneWidget({Key? key, this.viewList, this.sendDataWidge, this.getTextLoginMap, this.sendTextState}) : super(key: key);
   final viewList;
   final sendDataWidge;
   final getTextLoginMap;
   final sendTextState;
 
   @override
-  State<registerNoneWidget> createState() => _registerNoneWidgetState();
+  State<RegisterNoneWidget> createState() => _RegisterNoneWidgetState();
 }
 
-class _registerNoneWidgetState extends State<registerNoneWidget> {
+class _RegisterNoneWidgetState extends State<RegisterNoneWidget> {
   var errorMessage = '';
   var checkBox = {};
 
@@ -307,15 +307,15 @@ class _registerNoneWidgetState extends State<registerNoneWidget> {
 }
 
 
-class registerTelephonWidget extends StatefulWidget {
-  registerTelephonWidget({Key? key, this.sendDataWidge}) : super(key: key);
+class RegisterTelephonWidget extends StatefulWidget {
+  const RegisterTelephonWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
-  State<registerTelephonWidget> createState() => _registerTelephonWidgetState();
+  State<RegisterTelephonWidget> createState() => _RegisterTelephonWidgetState();
 }
 
-class _registerTelephonWidgetState extends State<registerTelephonWidget> {
+class _RegisterTelephonWidgetState extends State<RegisterTelephonWidget> {
   var textValue;
   @override
   Widget build(BuildContext context) {
@@ -358,15 +358,15 @@ class _registerTelephonWidgetState extends State<registerTelephonWidget> {
   }
 }
 
-class registerSeatWidget extends StatefulWidget {
-  registerSeatWidget({Key? key, this.sendDataWidge}) : super(key: key);
+class RegisterSeatWidget extends StatefulWidget {
+  const RegisterSeatWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
-  State<registerSeatWidget> createState() => _registerSeatWidgetState();
+  State<RegisterSeatWidget> createState() => _RegisterSeatWidgetState();
 }
 
-class _registerSeatWidgetState extends State<registerSeatWidget> {
+class _RegisterSeatWidgetState extends State<RegisterSeatWidget> {
   List<String> dropdownList2 = ['1관', '2관'];
 
   var selectedDropdown2;
@@ -432,15 +432,15 @@ class _registerSeatWidgetState extends State<registerSeatWidget> {
 }
 
 
-class registerKindWidget extends StatefulWidget {
-  registerKindWidget({Key? key, this.sendDataWidge}) : super(key: key);
+class RegisterKindWidget extends StatefulWidget {
+  const RegisterKindWidget({Key? key, this.sendDataWidge}) : super(key: key);
   final sendDataWidge;
 
   @override
-  State<registerKindWidget> createState() => _registerKindWidgetState();
+  State<RegisterKindWidget> createState() => _RegisterKindWidgetState();
 }
 
-class _registerKindWidgetState extends State<registerKindWidget> {
+class _RegisterKindWidgetState extends State<RegisterKindWidget> {
   List<String> dropdownList = ['고등부', '재수', '공시'];
 
   var selectedDropdown;
@@ -483,23 +483,23 @@ class _registerKindWidgetState extends State<registerKindWidget> {
 }
 
 
-class registerSignUpButton extends StatefulWidget {
-  registerSignUpButton({Key? key, this.textLoginCode, this.textLoginMap, this.showSnackBar, this.textFiedlState}) : super(key: key);
+class RegisterSignUpButton extends StatefulWidget {
+  const RegisterSignUpButton({Key? key, this.textLoginCode, this.textLoginMap, this.showSnackBar, this.textFiedlState}) : super(key: key);
   final textLoginCode;
   final textLoginMap;
   final showSnackBar;
   final textFiedlState;
 
   @override
-  State<registerSignUpButton> createState() => _registerSignUpButtonState();
+  State<RegisterSignUpButton> createState() => _RegisterSignUpButtonState();
 }
 
-class _registerSignUpButtonState extends State<registerSignUpButton> {
+class _RegisterSignUpButtonState extends State<RegisterSignUpButton> {
 
   @override
   Widget build(BuildContext context) {
     String toEmail = '${widget.textLoginMap['ID']}@studyallcare.com';
-    var toNewMap = {
+    Map<String, dynamic> toNewMap = {
       'pw' : widget.textLoginMap['비밀번호'],
       'uid' : 'Error',
       'name': widget.textLoginMap['이름'],
@@ -518,26 +518,26 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
       child: ElevatedButton(
         onPressed: () async{
           if (widget.textLoginCode != widget.textLoginMap['확인 코드'] || widget.textLoginCode == null){
-            showDialog(context: context, builder: (context) => failDialog( failContent : '확인코드가 일치하지않습니다.' ) );
+            showDialog(context: context, builder: (context) => FailDialog( failContent : '확인코드가 일치하지않습니다.' ) );
             }else {
               if( widget.textLoginMap['ID'] == null || widget.textFiedlState['ID'] == false){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '아이디 중복 체크를 해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '아이디 중복 체크를 해주세요.' ) );
               }else if( widget.textLoginMap['비밀번호'] == null || widget.textFiedlState['비밀번호'] == false){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '비밀번호를 제대로 입력해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '비밀번호를 제대로 입력해주세요.' ) );
               }else if( widget.textFiedlState['비밀번호 확인'] == false || widget.textFiedlState['비밀번호 확인'] == null){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '비밀번호 확인란에 비밀번호를 똑같이 입력해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '비밀번호 확인란에 비밀번호를 똑같이 입력해주세요.' ) );
               }else if( widget.textLoginMap['이름'] == '' || widget.textLoginMap['이름'] == null || widget.textFiedlState['이름'] == false){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '이름을 제대로 입력해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '이름을 제대로 입력해주세요.' ) );
               }else if( widget.textLoginMap['전화번호'] == null || widget.textFiedlState['전화번호'] == false){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '전화번호를 제대로 입력해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '전화번호를 제대로 입력해주세요.' ) );
               }else if( widget.textLoginMap['자리번호'] == null ){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '자리번호를 선택해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '자리번호를 선택해주세요.' ) );
               }else if( widget.textLoginMap['자리번호_seat'] == '' || widget.textLoginMap['자리번호_seat'] == null || widget.textFiedlState['자리번호_seat'] == false){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '자리번호를 제대로 입력해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '자리번호를 제대로 입력해주세요.' ) );
               }else if( widget.textLoginMap['학업'] == null){
-                showDialog(context: context, builder: (context) => failDialog( failContent : '학업을 선택해주세요.' ) );
+                showDialog(context: context, builder: (context) => FailDialog( failContent : '학업을 선택해주세요.' ) );
               }else if (widget.textLoginMap['학업'] == '고등부' || widget.textLoginMap['학업'] == '재수'){  //고등학생or 재수 일시 부모님 전화번호 입력
-              showDialog(context: context, builder: (context) => parentDialog(textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
+              showDialog(context: context, builder: (context) => ParentDialog( textLoginTelePhone: widget.textLoginMap['전화번호'] , textLoginMap : widget.textLoginMap, showSnackBar : widget.showSnackBar, toNewMap : toNewMap) );
             }else{  //아닐시 그냥 회원가입 시도!
               try {
                 var result = await auth.createUserWithEmailAndPassword(
@@ -578,19 +578,20 @@ class _registerSignUpButtonState extends State<registerSignUpButton> {
 }
 
 
-class parentDialog extends StatefulWidget {
-  parentDialog({Key? key, this.textLoginMap, this.showSnackBar, this.toNewMap}) : super(key: key);
+class ParentDialog extends StatefulWidget {
+  const ParentDialog({Key? key, this.textLoginMap, this.showSnackBar, this.toNewMap, this.textLoginTelePhone}) : super(key: key);
+  final textLoginTelePhone;
   final showSnackBar;
   final textLoginMap;
-  var toNewMap;
+  final toNewMap;
 
   @override
-  State<parentDialog> createState() => _parentDialogState();
+  State<ParentDialog> createState() => _ParentDialogState();
 }
 
-class _parentDialogState extends State<parentDialog> {
+class _ParentDialogState extends State<ParentDialog> {
   var textValue;
-  var parentContact;
+  String parentContact = '';
   bool errorCheck = false;
 
   @override
@@ -620,14 +621,16 @@ class _parentDialogState extends State<parentDialog> {
       actions: [
         ElevatedButton(
           onPressed: () async{
-            if (widget.textLoginMap['학업'] == '재수'){
+            if (parentContact == widget.textLoginTelePhone){
+              widget.showSnackBar(context, '부모님 전화번호를 입력해주세요.');
+            }else if (widget.textLoginMap['학업'] == '재수'){
                 try {
                   var result = await auth.createUserWithEmailAndPassword(
                     email: toEmail,
                     password: widget.textLoginMap['비밀번호'],
                   );
                   setState(() {
-                    if (parentContact != '' && parentContact != null) {
+                    if (parentContact != '') {
                       widget.toNewMap['parent'] = parentContact;
                     }
                     widget.toNewMap['uid'] = result.user!.uid;
@@ -651,7 +654,7 @@ class _parentDialogState extends State<parentDialog> {
                     Navigator.pop(context);
                   });
                 }
-            }else if (parentContact == '' || parentContact == null || parentContact.length < 9){
+            }else if (parentContact == '' || parentContact.length < 9){
               widget.showSnackBar(context, '전화번호를 입력해주세요.');
             }else {
               try {
@@ -690,17 +693,17 @@ class _parentDialogState extends State<parentDialog> {
         ElevatedButton(
           onPressed: () {Navigator.pop(context);},
           style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
-          child: Text('취소', style: style.dialogCheckText),
+          child: Text(parentContact == '' ? '넘어가기' : '취소', style: style.dialogCheckText),
         )
       ],
     );
   }
 }
 
-class failDialog extends StatelessWidget {
-  const failDialog({Key? key, this.failContent}) : super(key: key);
-
+class FailDialog extends StatelessWidget {
+  const FailDialog({Key? key, this.failContent}) : super(key: key);
   final failContent;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

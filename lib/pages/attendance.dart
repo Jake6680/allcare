@@ -8,16 +8,16 @@ import '../style.dart' as style;
 final firestore = FirebaseFirestore.instance;
 final info = NetworkInfo();
 
-class attendanceCheck extends StatefulWidget {
-  const attendanceCheck({Key? key, this.fireDataSeat, this.buttonState}) : super(key: key);
+class AttendanceCheck extends StatefulWidget {
+  const AttendanceCheck({Key? key, this.fireDataSeat, this.buttonState}) : super(key: key);
   final fireDataSeat;
   final buttonState;
 
   @override
-  State<attendanceCheck> createState() => _attendanceCheckState();
+  State<AttendanceCheck> createState() => _AttendanceCheckState();
 }
 
-class _attendanceCheckState extends State<attendanceCheck> {
+class _AttendanceCheckState extends State<AttendanceCheck> {
   bool sendErrorLevel = false;
   bool errorLevel = false;
   var fireDataWifi = [];
@@ -85,7 +85,7 @@ class _attendanceCheckState extends State<attendanceCheck> {
           }else{
             try{
               final ref = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}');
-              await ref.set({
+              await ref.update({
                 'state': widget.buttonState
               });
             }catch(e) {
@@ -102,7 +102,7 @@ class _attendanceCheckState extends State<attendanceCheck> {
                 showSnackBar(context, '성공');
                 Navigator.pop(context);
               });
-            };
+            }
           }
 
         },

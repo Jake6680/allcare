@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../style.dart' as style;
 
-class noticeUI extends StatelessWidget {
-  const noticeUI({Key? key}) : super(key: key);
+class NoticeUI extends StatelessWidget {
+  const NoticeUI({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

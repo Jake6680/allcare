@@ -1,4 +1,3 @@
-import 'package:allcare/pages/leave.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_overflow/animated_overflow.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,8 +7,10 @@ import 'package:allcare/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import './pages/leavelist.dart';
 import './pages/login.dart';
 import './style.dart' as style;
 import './pages/letter.dart';
@@ -17,8 +18,8 @@ import './pages/notice.dart';
 import './pages/attendance.dart';
 
 
-final auth = FirebaseAuth.instance;
-final firestore = FirebaseFirestore.instance;
+final authMain = FirebaseAuth.instance;
+final firestoreMain = FirebaseFirestore.instance;
 
 void main() async{
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,7 @@ void main() async{
         theme: style.theme,
         initialRoute: '/',
         routes: {
-          '/': (context) => loginUI(),
+          '/': (context) => LoginUI(),
           '/home': (context) => MyApp(),
         },
         localizationsDelegates: const [
@@ -49,7 +50,7 @@ void main() async{
 
 
 class MyApp extends StatefulWidget {
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -57,32 +58,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var buttonName = ['출석체크', '외출/조퇴/결석', '외출(고정)', '도시락 신청', 'English Test', '주간 영어 모의고사 신청', '모의고사 신청', '상담 신청'];
-  var fireDataName; var fireDataAlertDetail; var fireDataAlertSwitch; var fireDataSeat;
+  var fireDataName;
+  var fireDataAlertDetail;
+  var fireDataAlertSwitch;
+  var fireDataSeat;
 
   void showSnackBar(BuildContext context, result) {
     final snackBar = SnackBar(
       content: Text(result, textAlign: TextAlign.center, style: style.normalText),
-      backgroundColor: Colors.black.withOpacity(0.8),
+      backgroundColor: Colors.black.withOpacity(0.9),
       behavior: SnackBarBehavior.floating,
       shape: StadiumBorder(),
-      width: result == '알수없는 오류' ? 200 : 100,
+      width: result == '알수없는 오류' ? 200 : result.length > 10 ? 300 : 100,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   fireGet() async{
     try {
-      await firestore.collection('customer').where('uid', isEqualTo: auth.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
+      await firestoreMain.collection('customer').where('uid', isEqualTo: authMain.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
       setState(() {
         fireDataName = docName['name'];
         fireDataSeat = docName['seat'];
       });
       }});
-      var result = await firestore.collection('Code').doc('alertID').get();
+      var result = await firestoreMain.collection('Code').doc('alertID').get();
       setState(() {
         fireDataAlertSwitch = result['switch'];
         fireDataAlertDetail = result['content'];
       });
+      final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}/state');
+      final snapshot = await refGet.get();
+      if (snapshot.exists) {
+        Future((){
+          showSnackBar(context, '현재 학원에 ${snapshot.value == 'attendance' ? '등원' : '하원'}된 상태입니다.');
+        });
+      }
     }catch(e){
       showSnackBar(context, '알수없는 오류');
     }
@@ -102,7 +113,7 @@ class _MyAppState extends State<MyApp> {
       child: Scaffold(
         floatingActionButton:
         FloatingActionButton.extended(
-          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => letterUI(fireDataName : fireDataName) ));},
+          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LetterUI(fireDataName : fireDataName) ));},
           label: Text('익명 편지', style: style.floatingText),
           icon: Icon(Icons.mail, color: Colors.white, size: 30),
           backgroundColor: Color(0xff0B01A2),
@@ -125,9 +136,9 @@ class _MyAppState extends State<MyApp> {
               Stack(
                 children: [
                   IconButton(
-                      icon: Icon(Icons.notifications, size: 33,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => noticeUI() ));}
+                      icon: Icon(Icons.notifications, size: 33,), onPressed: (){showNotification(); Navigator.push(context, CupertinoPageRoute(builder: (c) => NoticeUI() ));}
                   ),
-                  alertIconUI()
+                  AlertIconUI()
                 ],
               ),
             ],
@@ -142,7 +153,7 @@ class _MyAppState extends State<MyApp> {
               itemCount: buttonName.length + 1,
               itemBuilder: (c, i) {
                 if (i == 0) {
-                  return fireDataAlertSwitch == true ? noticeAlert(fireDataAlertDetail: fireDataAlertDetail) : Container();
+                  return fireDataAlertSwitch == true ? NoticeAlert(fireDataAlertDetail: fireDataAlertDetail) : Container();
                 } else if (buttonName[i - 1] == '출석체크'){
                   return Container(
                     margin: EdgeInsets.fromLTRB(13, 0, 13, 20),
@@ -156,7 +167,7 @@ class _MyAppState extends State<MyApp> {
                             height: 70,
                             child: ElevatedButton(
                             onPressed: () {
-                             showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'attendance' ));
+                             showDialog(context: context, builder: (context) => AttendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'attendance' ));
                             },
                             style: ButtonStyle(
                               shape: MaterialStateProperty.all(
@@ -178,7 +189,7 @@ class _MyAppState extends State<MyApp> {
                             height: 70,
                             child: ElevatedButton(
                               onPressed: () {
-                                showDialog(context: context, builder: (context) => attendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'backHome' ));
+                                showDialog(context: context, builder: (context) => AttendanceCheck( fireDataSeat : fireDataSeat, buttonState : 'backHome' ));
                               },
                               style: ButtonStyle(
                                   shape: MaterialStateProperty.all(
@@ -225,13 +236,13 @@ class _MyAppState extends State<MyApp> {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class noticeAlert extends StatelessWidget {
-  noticeAlert({Key? key, this.fireDataAlertDetail}) : super(key: key);
-  var fireDataAlertDetail;
+class NoticeAlert extends StatelessWidget {
+  const NoticeAlert({Key? key, this.fireDataAlertDetail}) : super(key: key);
+  final fireDataAlertDetail;
 
   @override
   Widget build(BuildContext context) {
-    double _width = MediaQuery.of(context).size.width;
+    double writeWidth = MediaQuery.of(context).size.width;
     return Center(
       child: Container(
         margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
@@ -249,7 +260,7 @@ class noticeAlert extends StatelessWidget {
             Container(margin: EdgeInsets.fromLTRB(7, 0, 5, 0) ,child: Image(image: AssetImage("assets/speaker.png"),width: 30,)),
             AnimatedOverflow(
               animatedOverflowDirection: AnimatedOverflowDirection.HORIZONTAL,
-              maxWidth: _width / 1.5,
+              maxWidth: writeWidth / 1.5,
               padding: 0,
               speed: 70.0,
               child: GestureDetector(
@@ -260,7 +271,7 @@ class noticeAlert extends StatelessWidget {
                   overflow: TextOverflow.visible,
                 ),
                 onTap: (){
-                  showDialog(context: context, builder: (context) => alertDetailDialog(fireDataAlertDetail : fireDataAlertDetail));
+                  showDialog(context: context, builder: (context) => AlertDetailDialog(fireDataAlertDetail : fireDataAlertDetail));
                 },
               ),
             ),
@@ -272,8 +283,8 @@ class noticeAlert extends StatelessWidget {
 }
 
 
-class alertIconUI extends StatelessWidget {
-  const alertIconUI({Key? key}) : super(key: key);
+class AlertIconUI extends StatelessWidget {
+  const AlertIconUI({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -300,8 +311,8 @@ class alertIconUI extends StatelessWidget {
   }
 }
 
-class alertDetailDialog extends StatelessWidget {
-  const alertDetailDialog({Key? key, this.fireDataAlertDetail}) : super(key: key);
+class AlertDetailDialog extends StatelessWidget {
+  const AlertDetailDialog({Key? key, this.fireDataAlertDetail}) : super(key: key);
   final fireDataAlertDetail;
 
   @override
