@@ -65,8 +65,7 @@ class _LoginUIState extends State<LoginUI> {
     if (loginDataed == true) {
       Future((){
         FlutterNativeSplash.remove();
-      Navigator.of(context).pushNamedAndRemoveUntil(
-          '/home', (Route<dynamic> route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
       });
     } else if (fireLoginLevel == true) {
       FlutterNativeSplash.remove();

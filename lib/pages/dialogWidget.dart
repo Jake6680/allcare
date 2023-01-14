@@ -25,11 +25,12 @@ class FailDialog extends StatelessWidget {
 
 void showSnackBar(BuildContext context, result) {
   final snackBar = SnackBar(
+    duration: Duration(milliseconds: 1000),
     content: Text(result, textAlign: TextAlign.center, style: style.normalText),
     backgroundColor: Colors.black.withOpacity(0.8),
     behavior: SnackBarBehavior.floating,
     shape: StadiumBorder(),
-    width: result.lengh < 5 ? 100 : result.lengh < 10 ? 200 : 300,
+    width: result.length < 5 ? 100 : result.length < 10 ? 200 : 300,
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

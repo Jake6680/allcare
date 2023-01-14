@@ -11,11 +11,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import './pages/leavelist.dart';
+import './pages/academy.dart';
 import './pages/login.dart';
-import './style.dart' as style;
 import './pages/letter.dart';
 import './pages/notice.dart';
 import './pages/attendance.dart';
+import './style.dart' as style;
 
 
 final authMain = FirebaseAuth.instance;
@@ -34,6 +35,8 @@ void main() async{
         routes: {
           '/': (context) => LoginUI(),
           '/home': (context) => MyApp(),
+          '/leave': (context) => LeaveUI(),
+          '/academy': (context) => AcademyUI(),
         },
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
@@ -65,10 +68,12 @@ class _MyAppState extends State<MyApp> {
 
   void showSnackBar(BuildContext context, result) {
     final snackBar = SnackBar(
+      duration: Duration(milliseconds: 1000),
       content: Text(result, textAlign: TextAlign.center, style: style.normalText),
       backgroundColor: Colors.black.withOpacity(0.9),
       behavior: SnackBarBehavior.floating,
       shape: StadiumBorder(),
+
       width: result == '알수없는 오류' ? 200 : result.length > 10 ? 300 : 100,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -215,7 +220,9 @@ class _MyAppState extends State<MyApp> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (buttonName[i - 1] == '외출/조퇴/결석'){
-                            Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveUI( fireDataSeat : fireDataSeat) ));
+                            Navigator.of(context).pushNamed('/leave');
+                          }else if (buttonName[i - 1] == '외출(고정)'){
+                            Navigator.of(context).pushNamed('/academy');
                           }
                         },
                         style: ButtonStyle(

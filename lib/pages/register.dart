@@ -17,6 +17,7 @@ class RegisterUI extends StatelessWidget {
 
     void showSnackBar(BuildContext context, result) {
         final snackBar = SnackBar(
+          duration: Duration(milliseconds: 1000),
           content: Text(result, textAlign: TextAlign.center, style: style.normalText),
           backgroundColor: Colors.black.withOpacity(0.8),
           behavior: SnackBarBehavior.floating,

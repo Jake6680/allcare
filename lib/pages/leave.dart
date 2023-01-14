@@ -4,7 +4,6 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import '../style.dart' as style;
-import './leavelist.dart';
 
 
 class LeaveAddUI extends StatefulWidget {
@@ -58,29 +57,36 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                       children: [
                         Text('사유', style: style.normalTextDark,),
                         SizedBox(height: 10,),
-                        TextField(
-                          minLines: 2,
-                          maxLines: 10,
-                          decoration: InputDecoration(
-                            hintText: '내용',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 1.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 2.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 4,blurRadius: 7, offset: Offset(0, 3))]
                           ),
-                          onChanged: (text){
-                            setState(() {
-                              becauseText1 = text;
-                            });
-                          },
+                          child: TextField(
+                            minLines: 3,
+                            maxLines: 10,
+                            decoration: InputDecoration(
+                              hintText: '내용',
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                              border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 1.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 2.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                            ),
+                            onChanged: (text){
+                              setState(() {
+                                becauseText1 = text;
+                              });
+                            },
+                          ),
                         ),
                         SizedBox(height: 30,),
                         Text('나가는 시간', style: style.normalTextDark,),
@@ -91,7 +97,7 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           //initialValue: _initialValue,
                           firstDate: DateTime.now(),
                           lastDate: DateTime(2100),
-                          icon: Icon(Icons.event),
+                          icon: Icon(Icons.event,color: Colors.grey,),
                           style: style.dateSelecter,
                           //use24HourFormat: false,
                           locale: Locale('ko', 'KR'),
@@ -99,6 +105,7 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                         SizedBox(height: 30,),
                         Text('돌아오는 시간', style: style.normalTextDark,),
                         DateTimePicker(
+                          decoration: InputDecoration(icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey, size: 30)),
                           type: DateTimePickerType.time,
                           controller: _controller2,
                           //initialValue: _initialValue,
@@ -118,12 +125,12 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '사유를 입력해주세요.'));
                             }else if (_valueChanged2 == '' || int.parse(_valueChanged2.toString().substring(0, 2)) < int.parse(_controller1.text.toString().substring(11, 13)) || int.parse(_valueChanged2.toString().substring(3, 5)) < int.parse(_controller1.text.toString().substring(14, 16))) {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '돌아오는 시간을 제대로 설정해주세요.'));
-                            }else if (int.parse(_valueChanged2.toString().substring(0, 2)) == int.parse(_controller1.text.toString().substring(11, 13)) && int.parse(_valueChanged2.toString().substring(3, 5)) == int.parse(_controller1.text.toString().substring(14, 16))){
+                            }else if (int.parse(_valueChanged2.toString().substring(0, 2)) == int.parse(_controller1.text.toString().substring(11, 13)) && int.parse(_valueChanged2.toString().substring(3, 5)) <= int.parse(_controller1.text.toString().substring(14, 16))){
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '돌아오는 시간을 제대로 설정해주세요.'));
                             } else{
-                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, date : _controller1.text.toString().substring(0, 10), startDate : _controller1.text.toString().substring(11, 16), endDate : _valueChanged2, backHomeType : 'outing', becauseText : becauseText1, clearMessage : '${_controller1.text.toString().substring(5, 7)}월 ${_controller1.text.toString().substring(8, 10)}일 ${_controller1.text.toString().substring(11, 16)} ~ $_valueChanged2', clearMessage2 : '외출을 하시겠습니까?'));
+                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, date : _controller1.text.toString().substring(0, 10), startDate : _controller1.text.toString().substring(11, 16), endDate : _valueChanged2, backHomeType : 'outing', becauseText : becauseText1, clearMessage : '${_controller1.text.toString().substring(5, 7)}월 ${_controller1.text.toString().substring(8, 10)}일 ${_controller1.text.toString().substring(11, 16)} ~ $_valueChanged2', clearMessage2 : '외출을 설정하시겠습니까?'));
                             }
-                          }, child: Text('보내기', style: style.normalText,)),
+                          }, child: Text('등록', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
                       ],
@@ -137,29 +144,36 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                       children: [
                         Text('사유', style: style.normalTextDark,),
                         SizedBox(height: 10,),
-                        TextField(
-                          minLines: 2,
-                          maxLines: 10,
-                          decoration: InputDecoration(
-                            hintText: '내용',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 1.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 2.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 4,blurRadius: 7, offset: Offset(0, 3))]
                           ),
-                          onChanged: (text){
-                            setState(() {
-                              becauseText2 = text;
-                            });
-                          },
+                          child: TextField(
+                            minLines: 3,
+                            maxLines: 10,
+                            decoration: InputDecoration(
+                              hintText: '내용',
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                              border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 1.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 2.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                            ),
+                            onChanged: (text){
+                              setState(() {
+                                becauseText2 = text;
+                              });
+                            },
+                          ),
                         ),
                         SizedBox(height: 30,),
                         SizedBox(
@@ -171,7 +185,7 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                             } else{
                               showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, backHomeType : 'leaveEarly', becauseText : becauseText2, clearMessage : '조퇴를 하시겠습니까?'));
                             }
-                          }, child: Text('보내기', style: style.normalText,)),
+                          }, child: Text('등록', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
                       ],
@@ -185,29 +199,36 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                       children: [
                         Text('사유', style: style.normalTextDark,),
                         SizedBox(height: 10),
-                        TextField(
-                          minLines: 2,
-                          maxLines: 10,
-                          decoration: InputDecoration(
-                            hintText: '내용',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 1.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black, width: 2.0),
-                              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            ),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 4,blurRadius: 7, offset: Offset(0, 3))]
                           ),
-                          onChanged: (text){
-                            setState(() {
-                              becauseText3 = text;
-                            });
-                          },
+                          child: TextField(
+                            minLines: 3,
+                            maxLines: 10,
+                            decoration: InputDecoration(
+                              hintText: '내용',
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                              border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 1.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white, width: 2.0),
+                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),),
+                              ),
+                            ),
+                            onChanged: (text){
+                              setState(() {
+                                becauseText3 = text;
+                              });
+                            },
+                          ),
                         ),SizedBox(height: 10,),
                         SfDateRangePicker(
                           minDate: DateTime.now(),
@@ -230,6 +251,18 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                               }
                             });
                           },
+                          monthCellStyle: const DateRangePickerMonthCellStyle(
+                            textStyle: style.dateWeekBody,
+                            todayTextStyle: style.dateSelectText,
+                          ),
+                          startRangeSelectionColor: Color(0xff362ea1),
+                          endRangeSelectionColor: Color(0xff362ea1),
+                          rangeSelectionColor: Color(0xff0B01A2).withOpacity(0.4),
+                          selectionTextStyle: style.barText2,
+                          todayHighlightColor: Color(0xff0B01A2),
+                          selectionColor: Colors.deepPurple,
+                          headerStyle: const DateRangePickerHeaderStyle(
+                              textStyle: style.dateWeekHead),
                         ),
                         Text('*결석 시작 날짜를 선택 후 결석 범위를 지정할 수 있습니다.', style: style.registerRedText2,),
                         Text('*하루만 결석할 때는 당일 날짜만 선택해주세요.', style: style.registerRedText2,),
@@ -243,9 +276,9 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                             } else if (becauseText3 == '') {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '사유를 입력해주세요.'));
                             } else{
-                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, endDate: setEndDate, startDate: setStartDate, backHomeType : 'absent', becauseText : becauseText3,clearMessage : '$setStartDate ~ $setEndDate', clearMessage2 : '결석을 하시겠습니까?'));
+                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, endDate: setEndDate, startDate: setStartDate, backHomeType : 'absent', becauseText : becauseText3,clearMessage : '$setStartDate ~ $setEndDate', clearMessage2 : '결석을 설정하시겠습니까?'));
                             }
-                          }, child: Text('보내기', style: style.normalText,)),
+                          }, child: Text('등록', style: style.normalText,)),
                         ),
                         SizedBox(height: 10,),
                       ],
@@ -364,6 +397,7 @@ class _CheckDialogState extends State<CheckDialog> {
 
   void showSnackBar(BuildContext context, content) {
     final snackBar = SnackBar(
+      duration: Duration(milliseconds: 1000),
       content: Text(content, textAlign: TextAlign.center, style: style.normalText),
       backgroundColor: Colors.black.withOpacity(0.9),
       behavior: SnackBarBehavior.floating,
@@ -383,27 +417,31 @@ class _CheckDialogState extends State<CheckDialog> {
         Text(widget.clearMessage ?? '',
             style: style.normalTextDark),
         Text(widget.clearMessage2 ?? '',
-            style: style.normalTextDark),
+            style: widget.clearMessage2 == null ? TextStyle(fontSize: 0)  : style.normalTextDark),
       ]),
       shape: style.dialogCheckButton,
       actions: [
         ElevatedButton(onPressed: () async{
           try{
-            final refa = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/${widget.backHomeType}');
+            final newPostKey = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+            final refa = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/$newPostKey');
             if (widget.backHomeType == 'outing'){
               await refa.set({
+                'type' : widget.backHomeType,
                 'reason' : widget.becauseText,
                 'start': '${widget.date} ${widget.startDate}',
                 'end': '${widget.date} ${widget.endDate}',
               });
             }else if (widget.backHomeType == 'absent') {
               await refa.set({
+                'type' : widget.backHomeType,
                 'reason' : widget.becauseText,
                 'start': widget.startDate,
                 'end': widget.endDate,
               });
             } else{
               await refa.set({
+                'type' : widget.backHomeType,
                 'reason' : widget.becauseText,
                 'date' : DateTime.now().toString().substring(0, 16)
               });
@@ -417,8 +455,8 @@ class _CheckDialogState extends State<CheckDialog> {
           }
           if (sendErrorLevel != true){
             Future((){
-              showSnackBar(context, widget.backHomeType == 'leaveEarly' || widget.backHomeType == 'absent' ? '원장님에게 문자도 남겨주세요!' : '저장 완료');
-              Navigator.pop(context);
+              showSnackBar(context, widget.backHomeType == 'leaveEarly' || widget.backHomeType == 'absent' ? '원장님에게 문자도 남겨주세요!' : '등록 완료');
+              Navigator.popUntil(context, ModalRoute.withName('/leave'));
             });
           }
         },
