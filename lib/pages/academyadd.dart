@@ -35,7 +35,6 @@ class _AcademyWidgetState extends State<AcademyWidget> {
   String _valueAcademy1 = '10:00';
   String _valueAcademy2 = '12:00';
   String acbecauseText = '';
-  bool valuesBoolCheck = false;
   List<String> valuesDateList = [];
   int valuesCount = 0;
 
@@ -162,11 +161,13 @@ class _AcademyWidgetState extends State<AcademyWidget> {
                   height: 50,
                   width: double.infinity,
                   child: ElevatedButton(onPressed: ()async{
-                    valuesDateList.clear();
+                    setState(() {
+                      valuesDateList.clear();
+                      valuesCount = 0;
+                    });
                     for (int i = 1; i < 7; i++) {
                       if (values[i] == true){
                         setState(() {
-                          valuesBoolCheck = true;
                           if (i == 1){
                             valuesDateList.add('월');
                             valuesCount++;

@@ -37,7 +37,7 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(centerTitle: true,title: Text('외출/조퇴/결석'),),
+      appBar: AppBar(centerTitle: true,title: Text('외출/조퇴/결석 등록'),),
       body: DefaultTabController(
         length: 3,
         child: CustomScrollView(

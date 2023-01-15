@@ -5,29 +5,30 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import './academyadd.dart';
+import './lunchboxadd.dart';
+import './lunchhistory.dart';
 import './dialogWidget.dart' as diawiget;
 import '../style.dart' as style;
 
 
 final authMain = FirebaseAuth.instance;
 final firestore2 = FirebaseFirestore.instance;
-
 RefreshController _refreshController = RefreshController(initialRefresh: false);
 
-class AcademyUI extends StatefulWidget {
-  const AcademyUI({Key? key}) : super(key: key);
+
+class LunchUI extends StatefulWidget {
+  const LunchUI({Key? key}) : super(key: key);
+
 
   @override
-  State<AcademyUI> createState() => _AcademyUIState();
+  State<LunchUI> createState() => _LunchUIState();
 }
 
-class _AcademyUIState extends State<AcademyUI> {
+class _LunchUIState extends State<LunchUI> {
   Map fireListData = {};
-  Map<String, dynamic> fireDataSeat = {};
   int itemTotalCount = 0;
   List<String> listViewAcademy = [];
-
+  Map<String, dynamic> fireDataSeat = {};
 
   void _onRefresh() async{
     await Future.delayed(Duration(milliseconds: 500));
@@ -55,38 +56,14 @@ class _AcademyUIState extends State<AcademyUI> {
     _refreshController.refreshCompleted();
   }
 
-  acbackRefresh() async{
-    try {
-      final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}');
-      final snapshot = await refGet.get();
-      if (snapshot.exists) {
-        setState(() {
-          itemTotalCount = 0;
-          listViewAcademy.clear();
-          fireListData = (snapshot.value as dynamic);
-          for (String leaveEarlyA in fireListData.keys){
-            if (leaveEarlyA != 'state'){
-              if (fireListData[leaveEarlyA]['type'] == 'Academy'){
-                listViewAcademy.add(leaveEarlyA);
-                itemTotalCount++;
-              }
-            }
-          }
-        });
-      }
-    } catch(e){
-      Future((){diawiget.showSnackBar(context, '알수없는 오류');});
-    }
-  }
-
 
   fireGetList() async{
+    await firestore2.collection('customer').where('uid', isEqualTo: authMain.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
+      setState(() {
+        fireDataSeat = docName['seat'];
+      });
+    }});
     try {
-      await firestore2.collection('customer').where('uid', isEqualTo: authMain.currentUser?.uid).get().then((QuerySnapshot dcName){for (var docName in dcName.docs) {
-        setState(() {
-          fireDataSeat = docName['seat'];
-        });
-      }});
       final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}');
       final snapshot = await refGet.get();
       if (snapshot.exists) {
@@ -105,7 +82,7 @@ class _AcademyUIState extends State<AcademyUI> {
         });
       }
     }catch(e){
-      diawiget.showSnackBar(context, '알수없는 오류');
+      Future((){diawiget.showSnackBar(context, '알수없는 오류');});
     }
   }
 
@@ -120,14 +97,20 @@ class _AcademyUIState extends State<AcademyUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton:
+      FloatingActionButton(
+        onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LunchHistory( checkHistoryUid  : authMain.currentUser?.uid) ));},
+        backgroundColor: Color(0xff0B01A2),
+        child: Icon(Icons.view_timeline, color: Colors.white, size: 30),
+      ),
 
       appBar: AppBar(
-        centerTitle: true,title: Text('설정 목록'),
+        centerTitle: true,title: Text('신청 목록'),
         actions: [
           IconButton(
             onPressed: (){
-              Navigator.push(context, CupertinoPageRoute(builder: (c) => AcademyAdd(fireDataSeat : fireDataSeat) )).then((value) {acbackRefresh();});
-              },
+              Navigator.push(context, CupertinoPageRoute(builder: (c) => LunchAddUI(fireDataSeat : fireDataSeat, checkLunchAddUid  : authMain.currentUser?.uid) ));
+            },
             icon : Icon(Icons.add, color: Colors.white, size: 30),
           ),],
       ),
@@ -138,28 +121,28 @@ class _AcademyUIState extends State<AcademyUI> {
         header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
         controller: _refreshController,
         onRefresh: _onRefresh,
-        child: itemTotalCount == 0 ? AcademyNoneData() : ListView.builder(itemBuilder: (c, i) => AcademyData(countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewAcdemy : listViewAcademy, onRefresh : _onRefresh), itemCount: itemTotalCount),
+        child: itemTotalCount == 0 ? LunchNoneData() : ListView.builder(itemBuilder: (c, i) => LunchData(countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewAcdemy : listViewAcademy, onRefresh : _onRefresh), itemCount: itemTotalCount),
       ),
     );
   }
 }
 
-class AcademyNoneData extends StatelessWidget {
-  const AcademyNoneData({Key? key}) : super(key: key);
+class LunchNoneData extends StatelessWidget {
+  const LunchNoneData({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center,children: [
-      Text('등록된 일정이 없습니다.', style: style.dateSelecterFix,),SizedBox(height: 5,),
-      Text('우측 상단 + 버튼을 눌러 일정을 등록하실 수 있습니다.', style: style.dateSelecter,),SizedBox(height: 5,),
+      Text('등록된 신청이 없습니다.', style: style.dateSelecterFix,),SizedBox(height: 5,),
+      Text('우측 상단 + 버튼을 눌러 도시락을 신청하실 수 있습니다.', style: style.dateSelecter,),SizedBox(height: 5,),
       Text('또는 화면을 밑으로 당겨서 새로고침해주세요.', style: style.dateSelecterFix,)
     ],),);
   }
 }
 
 
-class AcademyData extends StatefulWidget {
-  const AcademyData({Key? key, this.fireListData, this.countWidget, this.fireDataSeat, this.listViewAcdemy, this.onRefresh}) : super(key: key);
+class LunchData extends StatefulWidget {
+  const LunchData({Key? key, this.fireListData, this.countWidget, this.fireDataSeat, this.listViewAcdemy, this.onRefresh}) : super(key: key);
   final listViewAcdemy;
   final fireListData;
   final countWidget;
@@ -167,10 +150,10 @@ class AcademyData extends StatefulWidget {
   final onRefresh;
 
   @override
-  State<AcademyData> createState() => _AcademyDataState();
+  State<LunchData> createState() => _LunchDataState();
 }
 
-class _AcademyDataState extends State<AcademyData> {
+class _LunchDataState extends State<LunchData> {
 
 
   @override
@@ -203,13 +186,13 @@ class _AcademyDataState extends State<AcademyData> {
                 Icon(Icons.timelapse_outlined,size: 20, color: Colors.white,),
                 SizedBox(width: 4,),
                 Text(
-                 '${widget.fireListData[widget.listViewAcdemy[widget.countWidget]]['start']} ~ ${widget.fireListData[widget.listViewAcdemy[widget.countWidget]]['end'].toString()}',
+                  '${widget.fireListData[widget.listViewAcdemy[widget.countWidget]]['start']} ~ ${widget.fireListData[widget.listViewAcdemy[widget.countWidget]]['end'].toString()}',
                   style: style.listVeiwhirghitText,),
               ],),
             ],)),
             SizedBox(width: 10,),
             Flexible(fit: FlexFit.tight ,child: SizedBox(child: Center(child: IconButton(onPressed: () {
-              showDialog(context: context, builder: (context) => AcRemoveAnswer( listViewTotal : widget.listViewAcdemy, countWidget : widget.countWidget, fireDataSeat : widget.fireDataSeat, onRefresh : widget.onRefresh ));
+              showDialog(context: context, builder: (context) => LunchRemoveAnswer( listViewTotal : widget.listViewAcdemy, countWidget : widget.countWidget, fireDataSeat : widget.fireDataSeat, onRefresh : widget.onRefresh ));
             }, icon: Icon(Icons.delete, color: Colors.white, size: 30,),)),))
           ],
         ),
@@ -218,18 +201,18 @@ class _AcademyDataState extends State<AcademyData> {
   }
 }
 
-class AcRemoveAnswer extends StatefulWidget {
-  const AcRemoveAnswer({Key? key, this.countWidget, this.listViewTotal, this.fireDataSeat, this.onRefresh}) : super(key: key);
+class LunchRemoveAnswer extends StatefulWidget {
+  const LunchRemoveAnswer({Key? key, this.countWidget, this.listViewTotal, this.fireDataSeat, this.onRefresh}) : super(key: key);
   final countWidget;
   final listViewTotal;
   final fireDataSeat;
   final onRefresh;
 
   @override
-  State<AcRemoveAnswer> createState() => _AcRemoveAnswerState();
+  State<LunchRemoveAnswer> createState() => _LunchRemoveAnswerState();
 }
 
-class _AcRemoveAnswerState extends State<AcRemoveAnswer> {
+class _LunchRemoveAnswerState extends State<LunchRemoveAnswer> {
   bool removeError = false;
 
   @override

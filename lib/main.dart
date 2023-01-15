@@ -11,6 +11,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import './pages/leavelist.dart';
+import './pages/lunchbox.dart';
 import './pages/academy.dart';
 import './pages/login.dart';
 import './pages/letter.dart';
@@ -37,6 +38,7 @@ void main() async{
           '/home': (context) => MyApp(),
           '/leave': (context) => LeaveUI(),
           '/academy': (context) => AcademyUI(),
+          '/lunch': (context) => LunchUI(),
         },
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
@@ -223,6 +225,8 @@ class _MyAppState extends State<MyApp> {
                             Navigator.of(context).pushNamed('/leave');
                           }else if (buttonName[i - 1] == '외출(고정)'){
                             Navigator.of(context).pushNamed('/academy');
+                          }else if (buttonName[i - 1] == '도시락 신청'){
+                            Navigator.of(context).pushNamed('/lunch', arguments: fireDataSeat);
                           }
                         },
                         style: ButtonStyle(

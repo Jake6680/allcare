@@ -25,7 +25,7 @@ class LeaveUI extends StatefulWidget {
 
 class _LeaveUIState extends State<LeaveUI> {
   Map fireListData = {};
-  var fireDataSeat;
+  Map<String, dynamic> fireDataSeat = {};
   int itemTotalCount = 0;
   List<String> listViewOuting = [];
   List<String> listViewLeaveEarly = [];
@@ -98,6 +98,35 @@ class _LeaveUIState extends State<LeaveUI> {
     }
   }
 
+  letterbackRefresh() async{
+    try{
+      final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}');
+      final snapshot = await refGet.get();
+      if (snapshot.exists) {
+        setState(() {
+          itemTotalCount = 0;
+          listViewAbsent.clear();
+          listViewLeaveEarly.clear();
+          listViewOuting.clear();
+          listViewTotal.clear();
+          fireListData = (snapshot.value as dynamic);
+          for (String leaveEarlyA in fireListData.keys){
+            if (leaveEarlyA != 'state'){
+              if (fireListData[leaveEarlyA]['type'] == 'outing'){listViewOuting.add(leaveEarlyA); itemTotalCount++;}
+              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++;}
+              if (fireListData[leaveEarlyA]['type'] == 'absent'){listViewAbsent.add(leaveEarlyA); itemTotalCount++;}
+            }
+          }
+          for (String aa in listViewLeaveEarly){listViewTotal.add(aa);}
+          for (String aa in listViewOuting){listViewTotal.add(aa);}
+          for (String aa in listViewAbsent){listViewTotal.add(aa);}
+        });
+      }
+    }catch(e){
+      diawiget.showSnackBar(context, '알수없는 오류');
+    }
+  }
+
 
   @override
   void initState() {
@@ -114,7 +143,7 @@ class _LeaveUIState extends State<LeaveUI> {
         centerTitle: true,title: Text('설정 목록'),
         actions: [
           IconButton(
-          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveAddUI(fireDataSeat : fireDataSeat) ));},
+          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveAddUI(fireDataSeat : fireDataSeat) )).then((value) {letterbackRefresh();});},
           icon : Icon(Icons.add, color: Colors.white, size: 30),
         ),],
       ),

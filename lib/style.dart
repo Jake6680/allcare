@@ -20,6 +20,7 @@ ThemeData theme = ThemeData(
 const barText = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500, fontSize: 14);
 const barText2 = TextStyle(color:Color(0xffffffff), fontWeight: FontWeight.w500, fontSize: 15);
 const normalText = TextStyle(color:Color(0xffffffff), fontSize: 20, fontWeight: FontWeight.w600 );
+const normalTextgrey = TextStyle(color:Colors.grey, fontSize: 17, fontWeight: FontWeight.w600 );
 const normalTextDark = TextStyle(color:Color(0xff000000), fontSize: 20, fontWeight: FontWeight.w600 );
 const normalTextRed = TextStyle(color:Colors.red, fontSize: 20, fontWeight: FontWeight.w600 );
 const floatingText = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
