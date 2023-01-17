@@ -113,6 +113,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initNotification();
     fireGet();
+    FlutterNativeSplash.remove();
   }
 
   @override

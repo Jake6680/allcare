@@ -31,6 +31,7 @@ class _LeaveUIState extends State<LeaveUI> {
   List<String> listViewLeaveEarly = [];
   List<String> listViewAbsent = [];
   List<String> listViewTotal = [];
+  late bool _leaveisLoading;
 
   void _onRefresh() async{
     await Future.delayed(Duration(milliseconds: 500));
@@ -96,6 +97,9 @@ class _LeaveUIState extends State<LeaveUI> {
     }catch(e){
       diawiget.showSnackBar(context, '알수없는 오류');
     }
+    setState(() {
+      _leaveisLoading = false;
+    });
   }
 
   letterbackRefresh() async{
@@ -131,6 +135,7 @@ class _LeaveUIState extends State<LeaveUI> {
   @override
   void initState() {
     super.initState();
+    _leaveisLoading = true;
     fireGetList();
   }
 
@@ -147,7 +152,8 @@ class _LeaveUIState extends State<LeaveUI> {
         ),],
       ),
 
-      body: SmartRefresher(
+      body: _leaveisLoading ? const Center(child: SizedBox(width: 30,height: 30,child: CircularProgressIndicator(color: Color(0xff0B01A2),)),)
+          :SmartRefresher(
         enablePullDown: true,
         enablePullUp: false,
         header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),

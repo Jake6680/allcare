@@ -27,7 +27,7 @@ class _AcademyUIState extends State<AcademyUI> {
   Map<String, dynamic> fireDataSeat = {};
   int itemTotalCount = 0;
   List<String> listViewAcademy = [];
-
+  late bool _acisLoading;
 
   void _onRefresh() async{
     await Future.delayed(Duration(milliseconds: 500));
@@ -107,12 +107,16 @@ class _AcademyUIState extends State<AcademyUI> {
     }catch(e){
       diawiget.showSnackBar(context, '알수없는 오류');
     }
+    setState(() {
+      _acisLoading = false;
+    });
   }
 
 
   @override
   void initState() {
     super.initState();
+    _acisLoading = true;
     fireGetList();
   }
 
@@ -132,7 +136,8 @@ class _AcademyUIState extends State<AcademyUI> {
           ),],
       ),
 
-      body: SmartRefresher(
+      body: _acisLoading ? const Center(child: SizedBox(width: 30,height: 30,child: CircularProgressIndicator(color: Color(0xff0B01A2),)),)
+        :SmartRefresher(
         enablePullDown: true,
         enablePullUp: false,
         header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),

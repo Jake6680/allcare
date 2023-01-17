@@ -33,6 +33,7 @@ class _LunchUIState extends State<LunchUI> {
   Map<String, dynamic> fireDataSeat = {};
   List<String> reservtionCander = [];
   List<String> pinCander = [];
+  late bool _isLoading;
 
   void _onRefresh() async{
     await Future.delayed(Duration(milliseconds: 500));
@@ -204,12 +205,16 @@ class _LunchUIState extends State<LunchUI> {
     }catch(e){
       Future((){diawiget.showSnackBar(context, '알수없는 오류');});
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
 
   @override
   void initState() {
     super.initState();
+    _isLoading = true;
     fireGetList();
   }
 
@@ -235,7 +240,8 @@ class _LunchUIState extends State<LunchUI> {
           ),],
       ),
 
-      body: SmartRefresher(
+      body: _isLoading ? const Center(child: SizedBox(width: 30,height: 30,child: CircularProgressIndicator(color: Color(0xff0B01A2),)),)
+      :SmartRefresher(
         enablePullDown: true,
         enablePullUp: false,
         header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
