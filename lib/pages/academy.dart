@@ -177,7 +177,7 @@ class _AcademyDataState extends State<AcademyData> {
   Widget build(BuildContext context) {
     return ListTile(
       title: Container(
-        margin: EdgeInsets.fromLTRB(15, 20, 15, 0),
+        margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
             color: Color(0xff0099A4),

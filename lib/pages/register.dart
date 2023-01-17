@@ -689,12 +689,12 @@ class _ParentDialogState extends State<ParentDialog> {
             }
           },
           style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
-          child: Text('완료', style: style.dialogCheckText),
+          child: Text( widget.textLoginMap['학업'] == '고등부' ? '완료' : parentContact == '' ? '넘어가기' : '완료', style: style.dialogCheckText),
         ),
         ElevatedButton(
           onPressed: () {Navigator.pop(context);},
           style: ElevatedButton.styleFrom( shape: style.dialogCheckButton ),
-          child: Text(parentContact == '' ? '넘어가기' : '취소', style: style.dialogCheckText),
+          child: Text('취소', style: style.dialogCheckText),
         )
       ],
     );

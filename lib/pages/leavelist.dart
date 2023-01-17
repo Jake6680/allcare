@@ -138,7 +138,6 @@ class _LeaveUIState extends State<LeaveUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         centerTitle: true,title: Text('설정 목록'),
         actions: [
@@ -202,7 +201,7 @@ class _OALListDataState extends State<OALListData> {
   Widget build(BuildContext context) {
     return ListTile(
         title: Container(
-          margin: EdgeInsets.fromLTRB(15, 20, 15, 0),
+          margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Color(colorSetting()),

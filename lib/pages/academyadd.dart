@@ -125,7 +125,7 @@ class _AcademyWidgetState extends State<AcademyWidget> {
                     Flexible(
                       fit: FlexFit.tight,
                       child: DateTimePicker(
-                          decoration: InputDecoration(icon: Icon(Icons.access_time, color: Colors.grey), labelText: '나가는 시간',labelStyle: style.dropDownBoxText,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
+                          decoration: InputDecoration(focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)), icon: Icon(Icons.access_time, color: Colors.grey), labelText: '나가는 시간',labelStyle: style.dropDownBoxTextgrey,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
                           type: DateTimePickerType.time,
                           controller: _academycontroller1,
                           //initialValue: _initialValue,
@@ -140,7 +140,7 @@ class _AcademyWidgetState extends State<AcademyWidget> {
                     Flexible(
                       fit: FlexFit.tight,
                       child: DateTimePicker(
-                          decoration: InputDecoration(fillColor: Colors.red ,icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey,size: 30,), labelText: '들어오는 시간',labelStyle: style.dropDownBoxText,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
+                          decoration: InputDecoration(focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)), fillColor: Colors.red ,icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey,size: 30,), labelText: '들아오는 시간',labelStyle: style.dropDownBoxTextgrey,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
                           type: DateTimePickerType.time,
                           controller: _academycontroller2,
                           //initialValue: _initialValue,
@@ -204,7 +204,8 @@ class _AcademyWidgetState extends State<AcademyWidget> {
                     }else if (valuesDateList.isEmpty){
                       showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '요일을 선택해주세요.'));
                     }else{
-                      showDialog(context: context, builder: (context) => AcCheckDialog( valuesCount : valuesCount, valuesDateList: valuesDateList, valueAcademy1 : _valueAcademy1, valueAcademy2 : _valueAcademy2, acbecauseText : acbecauseText, fireDataSeat : widget.fireDataSeat));
+                      final acnewPostKey = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+                      showDialog(context: context, builder: (context) => AcCheckDialog( acnewPostKey : acnewPostKey , valuesCount : valuesCount, valuesDateList: valuesDateList, valueAcademy1 : _valueAcademy1, valueAcademy2 : _valueAcademy2, acbecauseText : acbecauseText, fireDataSeat : widget.fireDataSeat));
                     }
                   }, child: Text('등록',style: style.normalText,)),
                 )
@@ -217,13 +218,14 @@ class _AcademyWidgetState extends State<AcademyWidget> {
 }
 
 class AcCheckDialog extends StatefulWidget {
-  const AcCheckDialog({Key? key, this.valuesCount, this.valuesDateList, this.acbecauseText, this.valueAcademy1, this.valueAcademy2, this.fireDataSeat}) : super(key: key);
+  const AcCheckDialog({Key? key,this.acnewPostKey , this.valuesCount, this.valuesDateList, this.acbecauseText, this.valueAcademy1, this.valueAcademy2, this.fireDataSeat}) : super(key: key);
   final valuesDateList;
   final valueAcademy1;
   final valueAcademy2;
   final acbecauseText;
   final fireDataSeat;
   final valuesCount;
+  final acnewPostKey;
 
   @override
   State<AcCheckDialog> createState() => _AcCheckDialogState();
@@ -246,8 +248,7 @@ class _AcCheckDialogState extends State<AcCheckDialog> {
       actions: [
         ElevatedButton(onPressed: () async{
           try{
-            final acnewPostKey = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
-            final acref = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/$acnewPostKey');
+            final acref = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/${widget.acnewPostKey}');
             await acref.set({
               'type' : 'Academy',
               'reason' : widget.acbecauseText,

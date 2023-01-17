@@ -17,6 +17,7 @@ class LeaveAddUI extends StatefulWidget {
 class _LeaveAddUIState extends State<LeaveAddUI> {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
+  late TextEditingController _controller3;
   String _valueChanged2 = '';
   var setStartDate;
   var setEndDate;
@@ -29,8 +30,11 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
     super.initState();
     String lsHour = TimeOfDay.now().hour.toString().padLeft(2, '0');
     String lsMinute = TimeOfDay.now().minute.toString().padLeft(2, '0');
-    _controller1 = TextEditingController(text: DateTime.now().toString());
-    _controller2 = TextEditingController(text: '$lsHour:$lsMinute');
+    setState(() {
+      _controller1 = TextEditingController(text: DateTime.now().toString());
+      _controller2 = TextEditingController(text: '$lsHour:$lsMinute');
+      _controller3 = TextEditingController(text: '$lsHour:$lsMinute');
+    });
   }
 
 
@@ -89,24 +93,44 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           ),
                         ),
                         SizedBox(height: 30,),
-                        Text('나가는 시간', style: style.normalTextDark,),
-                        DateTimePicker(
-                          type: DateTimePickerType.dateTimeSeparate,
-                          dateMask: 'yyyy년-MMM-d일',
-                          controller: _controller1,
-                          //initialValue: _initialValue,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2100),
-                          icon: Icon(Icons.event,color: Colors.grey,),
-                          style: style.dateSelecter,
-                          //use24HourFormat: false,
-                          locale: Locale('ko', 'KR'),
+                        Row(
+                          children: [
+                            Flexible(
+                              fit: FlexFit.tight,
+                              flex: 3,
+                              child: DateTimePicker(
+                                type: DateTimePickerType.date,
+                                decoration: InputDecoration(focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)), icon: Icon(Icons.event,color: Colors.grey,), fillColor: Colors.red , labelStyle: style.dropDownBoxTextgrey,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0), labelText: '나가는 날짜'),
+                                dateMask: 'yyyy년-MMM-d일',
+                                controller: _controller1,
+                                //initialValue: _initialValue,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2100),
+                                style: style.dateSelecter,
+                                locale: Locale('ko', 'KR'),
+                              ),
+                            ),
+                            Flexible(
+                              fit: FlexFit.tight,
+                              flex: 2,
+                              child: DateTimePicker(
+                                  type: DateTimePickerType.time,
+                                  decoration: InputDecoration(focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)), fillColor: Colors.red , icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey, size: 30), labelText: '나가는 시간',labelStyle: style.dropDownBoxTextgrey,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
+                                  controller: _controller3,
+                                  //initialValue: _initialValue,
+                                  // firstDate: DateTime.now(),
+                                  icon: Icon(Icons.access_time),
+                                  style: style.dateSelecter,
+                                  //use24HourFormat: false,
+                                  locale: Locale('ko', 'KR'),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 30,),
-                        Text('돌아오는 시간', style: style.normalTextDark,),
                         DateTimePicker(
-                          decoration: InputDecoration(icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey, size: 30)),
-                          type: DateTimePickerType.time,
+                            type: DateTimePickerType.time,
+                            decoration: InputDecoration(focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)), fillColor: Colors.red , icon: Icon(Icons.share_arrival_time_outlined, color: Colors.grey, size: 30), labelText: '들아오는 시간',labelStyle: style.dropDownBoxTextgrey,contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),),
                           controller: _controller2,
                           //initialValue: _initialValue,
                             // firstDate: DateTime.now(),
@@ -128,7 +152,8 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                             }else if (int.parse(_valueChanged2.toString().substring(0, 2)) == int.parse(_controller1.text.toString().substring(11, 13)) && int.parse(_valueChanged2.toString().substring(3, 5)) <= int.parse(_controller1.text.toString().substring(14, 16))){
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '돌아오는 시간을 제대로 설정해주세요.'));
                             } else{
-                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, date : _controller1.text.toString().substring(0, 10), startDate : _controller1.text.toString().substring(11, 16), endDate : _valueChanged2, backHomeType : 'outing', becauseText : becauseText1, clearMessage : '${_controller1.text.toString().substring(5, 7)}월 ${_controller1.text.toString().substring(8, 10)}일 ${_controller1.text.toString().substring(11, 16)} ~ $_valueChanged2', clearMessage2 : '외출을 설정하시겠습니까?'));
+                              final newPostKey = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+                              showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey , fireDataSeat : widget.fireDataSeat, date : _controller1.text.toString().substring(0, 10), startDate :  _controller3.text, endDate : _valueChanged2, backHomeType : 'outing', becauseText : becauseText1, clearMessage : '${_controller1.text.toString().substring(5, 7)}월 ${_controller1.text.toString().substring(8, 10)}일 ${_controller1.text.toString().substring(11, 16)} ~ $_valueChanged2', clearMessage2 : '외출을 설정하시겠습니까?'));
                             }
                           }, child: Text('등록', style: style.normalText,)),
                         ),
@@ -183,7 +208,8 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                             if (becauseText2 == '') {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '사유를 입력해주세요.'));
                             } else{
-                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, backHomeType : 'leaveEarly', becauseText : becauseText2, clearMessage : '조퇴를 하시겠습니까?'));
+                              final newPostKey = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+                              showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey, fireDataSeat : widget.fireDataSeat, backHomeType : 'leaveEarly', becauseText : becauseText2, clearMessage : '조퇴를 하시겠습니까?'));
                             }
                           }, child: Text('등록', style: style.normalText,)),
                         ),
@@ -276,7 +302,8 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                             } else if (becauseText3 == '') {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '사유를 입력해주세요.'));
                             } else{
-                              showDialog(context: context, builder: (context) => CheckDialog( fireDataSeat : widget.fireDataSeat, endDate: setEndDate, startDate: setStartDate, backHomeType : 'absent', becauseText : becauseText3,clearMessage : '$setStartDate ~ $setEndDate', clearMessage2 : '결석을 설정하시겠습니까?'));
+                              final newPostKey = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+                              showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey , fireDataSeat : widget.fireDataSeat, endDate: setEndDate, startDate: setStartDate, backHomeType : 'absent', becauseText : becauseText3,clearMessage : '$setStartDate ~ $setEndDate', clearMessage2 : '결석을 설정하시겠습니까?'));
                             }
                           }, child: Text('등록', style: style.normalText,)),
                         ),
@@ -377,7 +404,7 @@ class FailDialog extends StatelessWidget {
 
 
 class CheckDialog extends StatefulWidget {
-  const CheckDialog({Key? key,this.fireDataSeat , this.backHomeType, this.becauseText , this.clearMessage, this.clearMessage2, this.date, this.startDate, this.endDate}) : super(key: key);
+  const CheckDialog({Key? key,this.newPostKey , this.fireDataSeat , this.backHomeType, this.becauseText , this.clearMessage, this.clearMessage2, this.date, this.startDate, this.endDate}) : super(key: key);
   final backHomeType;
   final fireDataSeat;
   final date;
@@ -386,6 +413,7 @@ class CheckDialog extends StatefulWidget {
   final becauseText;
   final clearMessage;
   final clearMessage2;
+  final newPostKey;
 
 
   @override
@@ -423,8 +451,7 @@ class _CheckDialogState extends State<CheckDialog> {
       actions: [
         ElevatedButton(onPressed: () async{
           try{
-            final newPostKey = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
-            final refa = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/$newPostKey');
+            final refa = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/${widget.newPostKey}');
             if (widget.backHomeType == 'outing'){
               await refa.set({
                 'type' : widget.backHomeType,

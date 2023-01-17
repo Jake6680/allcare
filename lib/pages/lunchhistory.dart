@@ -105,7 +105,6 @@ class _LunchHistoryBodyState extends State<LunchHistoryBody> {
   void initState() {
     super.initState();
     firestoreHistoryGetDate();
-    print(DateTime.now().toString().substring(14,16));
   }
 
   @override

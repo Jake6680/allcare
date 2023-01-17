@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:weekday_selector/weekday_selector.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_time_picker/date_time_picker.dart';
 
 import '../style.dart' as style;
 import './dialogWidget.dart' as diawiget;
@@ -9,24 +10,33 @@ import './dialogWidget.dart' as diawiget;
 final firestoreLunch = FirebaseFirestore.instance;
 
 class LunchAddUI extends StatefulWidget {
-  const LunchAddUI({Key? key, this.fireDataSeat, this.checkLunchAddUid}) : super(key: key);
+  const LunchAddUI({Key? key, this.pinCander, this.fireDataSeat, this.checkLunchAddUid, this.reservtionCander}) : super(key: key);
+  final reservtionCander;
   final checkLunchAddUid;
   final fireDataSeat;
+  final pinCander;
 
   @override
   State<LunchAddUI> createState() => _LunchAddUIState();
 }
 
 class _LunchAddUIState extends State<LunchAddUI> {
-  final lunchvalues = List.filled(7, false);
+  late TextEditingController _controller3;
+  final lunchvalues = <bool?>[null, false, false, false, false, false, false];
   final List<bool> _selectedDate = <bool>[false, false];
+  final List<bool> _selectedDate2 = <bool>[false, false];
   List<String> lunchvaluesDateList = [];
   List<String> lunchvaluesDateList2 = [];
   int lunchvaluesCount = 0;
   bool errorlevel2 = false;
   bool widgetReload = false;
+  bool checkSaturDay = false;
+  bool overlapReservtion = false;
+  bool pinCanderOverlay = false;
   var dinnerDeadLine;
   var lunchDeadLine;
+  var oneAddDate = DateTime.now();
+  List<String> boxTimesList = [];
 
   fireDeadlineGet() async{
     try {
@@ -49,32 +59,62 @@ class _LunchAddUIState extends State<LunchAddUI> {
   }
 
   widgetLunchCheck(context){
-      if (int.parse(DateTime.now().toString().substring(11,13)) > int.parse(lunchDeadLine.toString().substring(0,2))){
+      if (DateTime.now().hour > int.parse(lunchDeadLine.toString().substring(0,2))){
         return null;
-      }else if (int.parse(DateTime.now().toString().substring(11,13)) == int.parse(lunchDeadLine.toString().substring(0,2)) && int.parse(DateTime.now().toString().substring(14,16)) > int.parse(lunchDeadLine.toString().substring(3,5))) {
+      }else if (DateTime.now().hour == int.parse(lunchDeadLine.toString().substring(0,2)) && DateTime.now().minute > int.parse(lunchDeadLine.toString().substring(3,5))) {
         return null;
-      } else{
+      }else if (DateTime.now().weekday == 7){
+        return null;
+      }else{
         return () {
-          if (int.parse(DateTime.now().toString().substring(11, 13)) > int.parse(lunchDeadLine.toString().substring(0, 2))) {
+          if (DateTime.now().hour > int.parse(lunchDeadLine.toString().substring(0, 2))) {
             showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '신청이 마감되었습니다.'));
-          } else if (int.parse(DateTime.now().toString().substring(11, 13)) == int.parse(lunchDeadLine.toString().substring(0, 2)) && int.parse(DateTime.now().toString().substring(14, 16)) > int.parse(lunchDeadLine.toString().substring(3, 5))) {
+          } else if (DateTime.now().hour == int.parse(lunchDeadLine.toString().substring(0, 2)) && DateTime.now().minute > int.parse(lunchDeadLine.toString().substring(3, 5))) {
             showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '신청이 마감되었습니다.'));
-          } else{
-            showDialog(context: context, builder: (context) => CheckDialog(fireDataSeat : widget.fireDataSeat , boxTimes : '점심', checkLunchAddUid : widget.checkLunchAddUid, clearMessage : '금일 점심을 신청하시겠습까?' , lunchType : 'reservation', lunchDeadLineM : lunchDeadLine.toString().substring(3, 5), lunchDeadLineT : lunchDeadLine.toString().substring(0, 2)));
+          }else{
+            overlapReservtion = false;
+            for (int i = 0; i < widget.reservtionCander.length; i++){
+              if (widget.reservtionCander[i].toString().substring(0,10) == DateTime.now().toString().substring(0, 10) && widget.reservtionCander[i].toString().substring(10,11) == '0'){
+                setState(() {
+                  overlapReservtion = true;
+                });
+              }
+            }
+            if (overlapReservtion == false){
+              final newPostKey = '${Timestamp.fromDate(DateTime.parse(DateTime.now().toString().substring(0, 10))).seconds}0';
+              showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey, fireDataSeat : widget.fireDataSeat , boxTimes : '점심', checkLunchAddUid : widget.checkLunchAddUid, clearMessage : '금일 점심을 신청하시겠습까?' , lunchType : 'reservation', lunchDeadLineM : lunchDeadLine.toString().substring(3, 5), lunchDeadLineT : lunchDeadLine.toString().substring(0, 2)));
+            }else{
+              showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '중복된 신청이 있습니다.'));
+            }
           }
         };
       }
   }
 
   widgetDinnerCheck(context){
-    if (int.parse(DateTime.now().toString().substring(11,13)) >= int.parse(dinnerDeadLine.toString().substring(0,2))){
+    if (DateTime.now().hour >= int.parse(dinnerDeadLine.toString().substring(0,2))){
+      return null;
+    }else if (DateTime.now().weekday == 6 || DateTime.now().weekday == 7){
       return null;
     } else{
       return (){
-        if (int.parse(DateTime.now().toString().substring(11,13)) >= int.parse(dinnerDeadLine.toString().substring(0,2))){
+        if (DateTime.now().hour >= int.parse(dinnerDeadLine.toString().substring(0,2))){
           showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '신청이 마감되었습니다.'));
         } else{
-          showDialog(context: context, builder: (context) => CheckDialog(fireDataSeat : widget.fireDataSeat , boxTimes : '저녁', checkLunchAddUid : widget.checkLunchAddUid, clearMessage : '금일 저녁을 신청하시겠습까?' , lunchType : 'reservation', dinnerDeadLine2 : dinnerDeadLine.toString().substring(0,2)));
+          overlapReservtion = false;
+          for (int i = 0; i < widget.reservtionCander.length; i++){
+            if (widget.reservtionCander[i].toString().substring(0,10) == DateTime.now().toString().substring(0, 10) && widget.reservtionCander[i].toString().substring(10,11) == '1'){
+              setState(() {
+                overlapReservtion = true;
+              });
+            }
+          }
+          if (overlapReservtion == false){
+            final newPostKey = '${Timestamp.fromDate(DateTime.parse(DateTime.now().toString().substring(0, 10))).seconds}1';
+            showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey ,fireDataSeat : widget.fireDataSeat , boxTimes : '저녁', checkLunchAddUid : widget.checkLunchAddUid, clearMessage : '금일 저녁을 신청하시겠습까?' , lunchType : 'reservation', dinnerDeadLine2 : dinnerDeadLine.toString().substring(0,2)));
+          }else{
+            showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '중복된 신청이 있습니다.'));
+          }
         }
       };
     }
@@ -84,6 +124,13 @@ class _LunchAddUIState extends State<LunchAddUI> {
   void initState() {
     super.initState();
     fireDeadlineGet();
+    setState(() {
+      oneAddDate = DateTime(oneAddDate.year, oneAddDate.month, oneAddDate.day + 1,);
+      if ( oneAddDate.weekday == 7 ){
+        oneAddDate = DateTime(oneAddDate.year, oneAddDate.month, oneAddDate.day + 1,);
+      }
+      _controller3 = TextEditingController(text: oneAddDate.toString());
+    });
   }
 
 
@@ -177,7 +224,119 @@ class _LunchAddUIState extends State<LunchAddUI> {
                         ),
                   ListView(children: [
                     Container(
-
+                      padding: EdgeInsets.fromLTRB(30, 15, 30, 30),
+                      child: Column(
+                        children: [
+                          DateTimePicker(
+                            decoration: InputDecoration(
+                              fillColor: Colors.red ,
+                              icon: Icon(Icons.event,
+                                color: Colors.grey,size: 30,),
+                              labelText: '예약 날짜',labelStyle:
+                            style.dropDownBoxTextgrey,
+                              contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2))
+                            ),
+                            type: DateTimePickerType.date,
+                            dateMask: 'yyyy년-MMM-d일',
+                            controller: _controller3,
+                            //initialValue: _initialValue,
+                            firstDate: oneAddDate,
+                            lastDate: DateTime(2100),
+                            style: style.dateSelecter,
+                            selectableDayPredicate: (date) {
+                              if (date.weekday == 7) {
+                                return false;
+                              }
+                              return true;
+                            },
+                            //use24HourFormat: false,
+                            locale: Locale('ko', 'KR'),
+                          ),
+                          SizedBox(height: 23,),
+                          Row(
+                            children: [
+                              Icon(Icons.timelapse, color: Colors.grey,size: 25,),
+                              SizedBox(width: 1,),
+                              Text('시간',style: style.dateSelectTextgrey,),
+                              SizedBox(width: 10,),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                child: Center(
+                                  child: ToggleButtons(
+                                    direction: Axis.horizontal,
+                                    onPressed: (int index) {
+                                      // All buttons are selectable.
+                                      setState(() {
+                                        _selectedDate2[index] = !_selectedDate2[index];
+                                      });
+                                    },
+                                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                    selectedBorderColor: Colors.indigo[200],
+                                    selectedColor: Colors.white,
+                                    fillColor: Colors.indigo,
+                                    textStyle: style.dropDownBoxText,
+                                    constraints: const BoxConstraints(
+                                      minHeight: 40.0,
+                                      minWidth: 120.0,
+                                    ),
+                                    isSelected: _selectedDate2,
+                                    children: [Text('점심'), Text('저녁')],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 30,),
+                          SizedBox(
+                              height: 50,
+                              width: double.infinity,
+                              child: ElevatedButton(onPressed: (){
+                                setState(() {
+                                  print(DateTime.parse(_controller3.text).weekday);
+                                  boxTimesList.clear();
+                                });
+                                if (_selectedDate2[0] == false && _selectedDate2[1] == false){
+                                  showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '신청 시간을 선택해주세요.'));
+                                } else if (DateTime.parse(_controller3.text).weekday == 6 && _selectedDate2[1] == true){
+                                  showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '토요일 저녁은 신청이 불가능합니다.'));
+                                } else {
+                                  overlapReservtion = false;
+                                  if (_selectedDate2[0] == true){boxTimesList.add('점심');}
+                                  if (_selectedDate2[1] == true){boxTimesList.add('저녁');}
+                                  if (boxTimesList.length == 2){
+                                    for (int i = 0; i < widget.reservtionCander.length; i++){
+                                      setState(() {
+                                      if (widget.reservtionCander[i].toString().substring(0,10) == _controller3.text.toString().substring(0, 10) && widget.reservtionCander[i].toString().substring(10,11) == '0'){
+                                        overlapReservtion = true;
+                                      }else if (widget.reservtionCander[i].toString().substring(0,10) == _controller3.text.toString().substring(0, 10) && widget.reservtionCander[i].toString().substring(10,11) == '1'){
+                                        overlapReservtion = true;
+                                      }
+                                      });
+                                  }
+                                    }else{
+                                    for (int i = 0; i < widget.reservtionCander.length; i++){
+                                      if (widget.reservtionCander[i].toString().substring(0,10) == _controller3.text.toString().substring(0, 10) && widget.reservtionCander[i].toString().substring(10,11) == '${boxTimesList[0] == '점심' ? 0 : 1}'){
+                                        setState(() {
+                                          overlapReservtion = true;
+                                        });
+                                      }
+                                    }
+                                  }
+                                  if (overlapReservtion == false){
+                                    final newPostKey = '${Timestamp.fromDate(DateTime.parse(_controller3.text.toString().substring(0, 10))).seconds}';
+                                    final newPostKey2 = '${Timestamp.fromDate(DateTime.parse(_controller3.text.toString().substring(0, 10))).seconds}';
+                                    showDialog(context: context, builder: (context) => CheckDialog( newPostKey: newPostKey, newPostKey2 : newPostKey2 , boxTimesList : boxTimesList, fireDataSeat : widget.fireDataSeat , checkLunchAddUid : widget.checkLunchAddUid, clearMessage: _controller3.text.toString().substring(0, 10) , clearMessage2: '$boxTimesList', clearMessage3 : '도시락을 신청하시겠습까?' , lunchType : 'reservation', reservationDate : _controller3.text.toString().substring(0, 10)));
+                                  }else{
+                                    showDialog(context: context, builder: (context) => diawiget.FailDialog( failContent : '중복된 신청이 있습니다.'));
+                                  }
+                                 }
+                              }, child: Text('등록', style: style.normalText,))
+                          ),
+                          SizedBox(height: 10,),
+                          Text('공휴일, 도시락 휴무 날은 자동으로 이용내역에 추가되지 않습니다.', style: style.textFieldLabel)
+                        ],
+                      ),
                     ),
                   ],
                   ),
@@ -199,7 +358,7 @@ class _LunchAddUIState extends State<LunchAddUI> {
                                   onChanged: (int day) {
                                     setState(() {
                                       final index = day % 7;
-                                      lunchvalues[index] = !lunchvalues[index];
+                                      lunchvalues[index] = !lunchvalues[index]!;
                                     });
                                   },
                                   values: lunchvalues,
@@ -259,6 +418,7 @@ class _LunchAddUIState extends State<LunchAddUI> {
                               for (int i = 1; i < 7; i++) {
                                 if (lunchvalues[i] == true){
                                   setState(() {
+                                    checkSaturDay = false;
                                     if (i == 1){
                                       lunchvaluesDateList.add('월');
                                       lunchvaluesCount++;
@@ -276,25 +436,42 @@ class _LunchAddUIState extends State<LunchAddUI> {
                                       lunchvaluesCount++;
                                     }else if (i == 6){
                                       lunchvaluesDateList.add('토');
+                                      checkSaturDay = true;
                                       lunchvaluesCount++;
                                     }
                                   });
                                 }
                               }
-                              if (lunchvalues[0] == true){
-                                setState(() {
-                                  lunchvaluesDateList.add('일');
-                                  lunchvaluesCount++;
-                                });
-                              }
                               if (lunchvaluesDateList.isEmpty){
                                 showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '신청 요일을 선택해주세요.'));
                               } else if (_selectedDate[0] == false && _selectedDate[1] == false){
                                 showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '신청 시간을 선택해주세요.'));
-                              }else {
+                              }else if (checkSaturDay == true && _selectedDate[1] == true){
+                                showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '토요일 저녁은 신청이 불가능합니다.'));
+                              }else{
+                                pinCanderOverlay = false;
                                 if (_selectedDate[0] == true){lunchvaluesDateList2.add('점심');}
                                 if (_selectedDate[1] == true){lunchvaluesDateList2.add('저녁');}
-                                showDialog(context: context, builder: (context) => CheckDialog( checkLunchAddUid : widget.checkLunchAddUid, lunchvaluesDateList2 : lunchvaluesDateList2, lunchvaluesDateList : lunchvaluesDateList, lunchType : 'pin', fireDataSeat : widget.fireDataSeat, clearMessage : lunchvaluesDateList, clearMessage2 : lunchvaluesDateList2, clearMessage3 : '고정 신청을 하시겠습니까?'));
+                                if (_selectedDate[0] == true && _selectedDate[1] == true){
+                                  for (int i = 0; i < widget.pinCander.length; i++){
+                                    for (int ic = 0; ic <  lunchvaluesDateList.length; ic++){
+                                      if (widget.pinCander[i] == '${lunchvaluesDateList[ic]}0'){pinCanderOverlay = true;}
+                                      if (widget.pinCander[i] == '${lunchvaluesDateList[ic]}1'){pinCanderOverlay = true;}
+                                    }
+                                  }
+                                }else{
+                                  for (int i = 0; i < widget.pinCander.length; i++){
+                                    for (int ic = 0; ic <  lunchvaluesDateList.length; ic++){
+                                      if (widget.pinCander[i] == '${lunchvaluesDateList[ic]}${_selectedDate[0] == true ? 0 : 1}'){pinCanderOverlay = true;}
+                                    }
+                                  }
+                                }
+                                if (pinCanderOverlay == false){
+                                  final newPostKey = FirebaseDatabase.instance.ref('/lunch').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
+                                  showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey, lunchvaluesDateList2 : lunchvaluesDateList2 ,checkLunchAddUid : widget.checkLunchAddUid, lunchvaluesDateList : lunchvaluesDateList, lunchType : 'pin', fireDataSeat : widget.fireDataSeat, clearMessage : lunchvaluesDateList, clearMessage2 : lunchvaluesDateList2, clearMessage3 : '고정 신청을 하시겠습니까?'));
+                                }else{
+                                  showDialog(context: context, builder: (context) => diawiget.FailDialog(failContent: '중복된 고정요일이 있습니다.'));
+                                }
                               }
                             }, child: Text('등록', style: style.normalText,)),
                           ),
@@ -376,9 +553,12 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
 
 
 class CheckDialog extends StatefulWidget {
-  const CheckDialog({Key? key, this.lunchDeadLineT, this.lunchDeadLineM ,this.boxTimes, this.dinnerDeadLine2, this.checkLunchAddUid, this.clearMessage3, this.lunchvaluesDateList2, this.lunchvaluesDateList, this.fireDataSeat , this.clearMessage, this.clearMessage2, this.lunchType}) : super(key: key);
+  const CheckDialog({Key? key, this.lunchvaluesDateList2, this.newPostKey, this.newPostKey2, this.boxTimesList, this.reservationDate, this.lunchDeadLineT, this.lunchDeadLineM ,this.boxTimes, this.dinnerDeadLine2, this.checkLunchAddUid, this.clearMessage3, this.lunchvaluesDateList, this.fireDataSeat , this.clearMessage, this.clearMessage2, this.lunchType}) : super(key: key);
   final boxTimes;
   final lunchType;
+  final newPostKey;
+  final newPostKey2;
+  final boxTimesList;
   final fireDataSeat;
   final clearMessage;
   final clearMessage2;
@@ -387,8 +567,9 @@ class CheckDialog extends StatefulWidget {
   final lunchDeadLineT;
   final dinnerDeadLine2;
   final checkLunchAddUid;
-  final lunchvaluesDateList;
   final lunchvaluesDateList2;
+  final lunchvaluesDateList;
+  final reservationDate;
 
 
 
@@ -419,25 +600,57 @@ class _CheckDialogState extends State<CheckDialog> {
       actions: [
         ElevatedButton(onPressed: () async{
           if (widget.lunchType == 'reservation'){
-            if (widget.dinnerDeadLine2 != null && int.parse(DateTime.now().toString().substring(11,13)) >= int.parse(widget.dinnerDeadLine2)){
+            if (widget.dinnerDeadLine2 != null && DateTime.now().hour >= int.parse(widget.dinnerDeadLine2)){
               diawiget.showSnackBar(context, '신청이 마감되었습니다.');
               Navigator.pop(context);
-            } else if (widget.lunchDeadLineT != null && int.parse(DateTime.now().toString().substring(11,13)) > int.parse(widget.lunchDeadLineT)){
+            } else if (widget.lunchDeadLineT != null && DateTime.now().hour > int.parse(widget.lunchDeadLineT)){
               diawiget.showSnackBar(context, '신청이 마감되었습니다.');
               Navigator.pop(context);
-            } else if (widget.lunchDeadLineT != null && int.parse(DateTime.now().toString().substring(11,13)) == int.parse(widget.lunchDeadLineT) && int.parse(DateTime.now().toString().substring(14, 16)) > int.parse(widget.lunchDeadLineM)){
+            } else if (widget.lunchDeadLineT != null && DateTime.now().hour == int.parse(widget.lunchDeadLineT) && DateTime.now().minute > int.parse(widget.lunchDeadLineM)){
               diawiget.showSnackBar(context, '신청이 마감되었습니다.');
               Navigator.pop(context);
             } else{
               try{
-                final newPostKey = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/lunch').push().key;
-                final lunchref = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/lunch/$newPostKey');
-                if (widget.lunchType == 'reservation'){
-                  await lunchref.set({
-                    'type' : widget.lunchType,
-                    'date' : widget.dinnerDeadLine2 != null ? DateTime.now().toString().substring(0,10) : DateTime.now().toString().substring(0,10),
-                    'times' : widget.boxTimes,
-                    'uid' : widget.checkLunchAddUid,
+                if (widget.boxTimesList != null) {
+                  if (widget.boxTimesList.length == 2) {
+                    final lunchref = FirebaseDatabase.instance.ref('/lunch')
+                        .child('${widget.fireDataSeat['place']}/${widget
+                        .fireDataSeat['number']}/${widget.newPostKey}0');
+                    await lunchref.set({
+                      'type': widget.lunchType,
+                      'date': widget.reservationDate,
+                      'times': widget.boxTimesList[0],
+                      'uid': widget.checkLunchAddUid,
+                    });
+                    final lunchref2 = FirebaseDatabase.instance.ref('/lunch')
+                        .child('${widget.fireDataSeat['place']}/${widget
+                        .fireDataSeat['number']}/${widget.newPostKey2}1');
+                    await lunchref2.set({
+                      'type': widget.lunchType,
+                      'date': widget.reservationDate,
+                      'times': widget.boxTimesList[1],
+                      'uid': widget.checkLunchAddUid,
+                    });
+                  } else {
+                    final lunchref3 = FirebaseDatabase.instance.ref('/lunch')
+                        .child('${widget.fireDataSeat['place']}/${widget
+                        .fireDataSeat['number']}/${widget.newPostKey}${widget.boxTimesList[0] == '점심' ? 0 : 1}');
+                    await lunchref3.set({
+                      'type': widget.lunchType,
+                      'date': widget.reservationDate,
+                      'times':widget.boxTimesList[0],
+                      'uid': widget.checkLunchAddUid,
+                    });
+                  }
+                } else{
+                  final lunchref5 = FirebaseDatabase.instance.ref('/lunch')
+                      .child('${widget.fireDataSeat['place']}/${widget
+                      .fireDataSeat['number']}/${widget.newPostKey}');
+                  await lunchref5.set({
+                    'type': widget.lunchType,
+                    'date': DateTime.now().toString().substring(0, 10),
+                    'times': widget.boxTimes,
+                    'uid': widget.checkLunchAddUid,
                   });
                 }
               }catch(e) {
@@ -456,10 +669,9 @@ class _CheckDialogState extends State<CheckDialog> {
             }
           }else {
             try{
-              final newPostKey = FirebaseDatabase.instance.ref().child('attendance/${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/lunch').push().key;
-              final lunchref = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/lunch/$newPostKey');
+              final lunchref4 = FirebaseDatabase.instance.ref('/lunch').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}/${widget.newPostKey}');
               if (widget.lunchType == 'pin'){
-                await lunchref.set({
+                await lunchref4.set({
                   'type' : widget.lunchType,
                   'date' : widget.lunchvaluesDateList,
                   'times' : widget.lunchvaluesDateList2,
