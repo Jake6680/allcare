@@ -337,7 +337,7 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               color: Colors.white,
               child: Text(
-                "외출", style: style.dropDownBoxText,
+                "외출", style: style.dropDownBoxText2,
               ),
             ),
           ),
@@ -346,7 +346,7 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               color: Colors.white,
               child: Text(
-                "조퇴", style: style.dropDownBoxText,
+                "조퇴", style: style.dropDownBoxText2,
               ),
             ),
           ),
@@ -355,7 +355,7 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               color: Colors.white,
               child: Text(
-                "결석", style: style.dropDownBoxText,
+                "결석", style: style.dropDownBoxText2,
               ),
             ),
           ),

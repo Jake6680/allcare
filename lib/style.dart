@@ -30,6 +30,7 @@ const dialogCheckText = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
 const dialogCheckTextWhite = TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white);
 const dialogCheckTextBlack = TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black);
 const dropDownBoxText = TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black);
+const dropDownBoxText2 = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
 const dropDownBoxTextgrey = TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.grey);
 const dateSelecter = TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black);
 const dateSelecterFix = TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey);
