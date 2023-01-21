@@ -34,46 +34,53 @@ class _LoginUIState extends State<LoginUI> {
   }
 
   getUserImformation() async{
-    var content = await SharedPreferences.getInstance();
-    var userID = content.getString('userID');
-    var userPW = content.getString('userPW');
-      if (userID != null && userPW != null) {
-        try {
-          await authLogin.signInWithEmailAndPassword(
-              email: userID,
-              password: userPW
-          );
-        } catch (e) {
-          setState(() {
-            fireLoginLevel = true;
-          });
-        }
-        if (fireLoginLevel == true){
-          setState(() {
-            loginDataed = false;
-          });
-        }else {
-          setState(() {
-            loginDataed = true;
-          });
+      if(auth.currentUser?.uid == null){
+        var content = await SharedPreferences.getInstance();
+        var userID = content.getString('userID');
+        var userPW = content.getString('userPW');
+        if (userID != null && userPW != null) {
+          try {
+            await authLogin.signInWithEmailAndPassword(
+                email: userID,
+                password: userPW
+            );
+          } catch (e) {
+            setState(() {
+              fireLoginLevel = true;
+            });
+          }
+          if (fireLoginLevel == true){
+            setState(() {
+              loginDataed = false;
+            });
+          }else {
+            setState(() {
+              loginDataed = true;
+            });
+          }
+        }else{
+            setState(() {
+              loginDataed = false;
+            });
         }
       }else{
-        setState(() {
-          loginDataed = false;
-        });
+            setState(() {
+              loginDataed == true;
+            });
       }
-    if (loginDataed == true) {
-      Future((){
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-      });
-    } else if (fireLoginLevel == true) {
-      FlutterNativeSplash.remove();
-      Future((){
-        showSnackBar(context, '로그인 실패');
-      });
-    } else {
-      FlutterNativeSplash.remove();
-    }
+
+      if (loginDataed == true) {
+        Future((){
+          Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+        });
+      } else if (fireLoginLevel == true) {
+        FlutterNativeSplash.remove();
+        Future((){
+          showSnackBar(context, '로그인 실패');
+        });
+      } else {
+        FlutterNativeSplash.remove();
+      }
   }
 
 
@@ -111,8 +118,8 @@ class LoginBody extends StatefulWidget {
 }
 
 class _LoginBodyState extends State<LoginBody> {
-  var textFieldID;
-  var textFieldPW;
+  String textFieldID = '';
+  String textFieldPW = '';
 
   getlonginID(text){
     setState(() {
@@ -208,7 +215,7 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool errorLevel = false;
+   late bool errorLevel;
 
     setUserContent(userID, userPW) async{
       var content = await SharedPreferences.getInstance();
@@ -218,12 +225,12 @@ class LoginButton extends StatelessWidget {
 
     void showSnackBar(BuildContext context, result) {
       final snackBar = SnackBar(
-        duration: Duration(milliseconds: 800),
+        duration: Duration(milliseconds: 1000),
         content: Text(result, textAlign: TextAlign.center, style: style.normalText),
         backgroundColor: Colors.black.withOpacity(0.8),
         behavior: SnackBarBehavior.floating,
         shape: StadiumBorder(),
-        width: result == '아이디 또는 비밀번호를 틀렸습니다.' ? 300 : 100,
+        width: result.length < 5 ? 100 : result.length < 10 ? 200 : result.length < 15 ? 350 : 400,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -234,22 +241,37 @@ class LoginButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: ()async{
-          var toEmailID = '${textFieldID + '@studyallcare.com'}';
-          try {
-            await authLogin.signInWithEmailAndPassword(
-                email: toEmailID,
-                password: textFieldPW
-            );
-          } catch (e) {
-            showSnackBar(context, '아이디 또는 비밀번호를 틀렸습니다.');
-            errorLevel = true;
-          }
-          if (errorLevel != true) {
-            Future((){
-              setUserContent(toEmailID, textFieldPW);
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/home', (Route<dynamic> route) => false);
-            });
+          errorLevel = false;
+          if (textFieldID == ''){
+            showSnackBar(context, '아이디를 입력해주세요!');
+          }else if (textFieldPW == ''){
+            showSnackBar(context, '비밀번호를 입력해주세요!');
+          }else{
+            var toEmailID = '${textFieldID + '@studyallcare.com'}';
+            try {
+              await authLogin.signInWithEmailAndPassword(
+                  email: toEmailID,
+                  password: textFieldPW
+              );
+            } on FirebaseAuthException catch (e) {
+              errorLevel = true;
+              if (e.code == 'network-request-failed') {
+                showSnackBar(context, '네트워크 연결 상태 확인 후 다시 시도해주세요.');
+              }else if (e.code == 'user-not-found') {
+                showSnackBar(context, '사용자가 존재하지 않습니다.');
+              } else if (e.code == 'wrong-password') {
+                showSnackBar(context, '비밀번호를 확인하세요');
+              } else if (e.code == 'invalid-email') {
+                showSnackBar(context, '아이디을 확인하세요.');
+              }
+            }
+            if (errorLevel != true) {
+              Future((){
+                setUserContent(toEmailID, textFieldPW);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home', (Route<dynamic> route) => false);
+              });
+            }
           }
         },
         style: ElevatedButton.styleFrom(

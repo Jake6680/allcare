@@ -7,7 +7,8 @@ import '../style.dart' as style;
 
 
 class LeaveAddUI extends StatefulWidget {
-  const LeaveAddUI({Key? key, this.fireDataSeat}) : super(key: key);
+  const LeaveAddUI({Key? key, this.fireDataSeat, this.leaveEarlyBool}) : super(key: key);
+  final leaveEarlyBool;
   final fireDataSeat;
 
   @override
@@ -207,7 +208,9 @@ class _LeaveAddUIState extends State<LeaveAddUI> {
                           child: ElevatedButton(onPressed: (){
                             if (becauseText2 == '') {
                               showDialog(context: context, builder: (context) => FailDialog(failContent : '사유를 입력해주세요.'));
-                            } else{
+                            } else if (widget.leaveEarlyBool == true){
+                              showDialog(context: context, builder: (context) => FailDialog(failContent : '금일 신청된 조퇴가 있습니다.'));
+                            }else{
                               final newPostKey = FirebaseDatabase.instance.ref('/attendance').child('${widget.fireDataSeat['place']}/${widget.fireDataSeat['number']}').push().key;
                               showDialog(context: context, builder: (context) => CheckDialog( newPostKey : newPostKey, fireDataSeat : widget.fireDataSeat, backHomeType : 'leaveEarly', becauseText : becauseText2, clearMessage : '조퇴를 하시겠습니까?'));
                             }

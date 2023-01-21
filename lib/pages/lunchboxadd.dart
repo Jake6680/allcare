@@ -295,7 +295,6 @@ class _LunchAddUIState extends State<LunchAddUI> {
                                   width: double.infinity,
                                   child: ElevatedButton(onPressed: (){
                                     setState(() {
-                                      print(DateTime.parse(_controller3.text).weekday);
                                       boxTimesList.clear();
                                     });
                                     if (_selectedDate2[0] == false && _selectedDate2[1] == false){

@@ -4,7 +4,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
+import '../controller/loading_controller.dart';
 import './lunchboxadd.dart';
 import './lunchhistory.dart';
 import './dialogWidget.dart' as diawiget;
@@ -93,6 +95,7 @@ class _LunchUIState extends State<LunchUI> {
   }
 
   lunchBackRefresh() async{
+    IsLoadingController.to.isLoading = true;
     try {
       final refGet = FirebaseDatabase.instance.ref('/lunch').child('${fireDataSeat['place']}/${fireDataSeat['number']}');
       final snapshot = await refGet.get();
@@ -133,7 +136,9 @@ class _LunchUIState extends State<LunchUI> {
             reservtionCander.add('${fireListData[listViewReservationLunch[i]]['date']}${fireListData[listViewReservationLunch[i]]['times'] == '점심' ? 0 : 1}');
           }
         });
+        IsLoadingController.to.isLoading = false;
       }else{
+        IsLoadingController.to.isLoading = false;
         setState(() {
           itemTotalCount = 0;
           listViewReservationLunch.clear();
@@ -221,6 +226,7 @@ class _LunchUIState extends State<LunchUI> {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(IsLoadingController());
     return Scaffold(
       floatingActionButton:
       FloatingActionButton(
@@ -241,13 +247,31 @@ class _LunchUIState extends State<LunchUI> {
       ),
 
       body: _isLoading ? const Center(child: SizedBox(width: 30,height: 30,child: CircularProgressIndicator(color: Color(0xff0B01A2),)),)
-      :SmartRefresher(
-        enablePullDown: true,
-        enablePullUp: false,
-        header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        child: itemTotalCount == 0 ? LunchNoneData() : ListView.builder(itemBuilder: (c, i) => LunchData( itemTotalCount : itemTotalCount, countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewTotalLunch : listViewTotalLunch, onRefresh : _onRefresh), itemCount: itemTotalCount),
+      :Stack(
+        children: [
+          SmartRefresher(
+            enablePullDown: true,
+            enablePullUp: false,
+            header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
+            controller: _refreshController,
+            onRefresh: _onRefresh,
+            child: itemTotalCount == 0 ? LunchNoneData() : ListView.builder(itemBuilder: (c, i) => LunchData( itemTotalCount : itemTotalCount, countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewTotalLunch : listViewTotalLunch, onRefresh : _onRefresh), itemCount: itemTotalCount),
+          ),
+          Obx(
+                () => Offstage(
+                  offstage: !IsLoadingController.to.isLoading,
+                  child: Stack(children: const <Widget>[
+                    Opacity(
+                      opacity: 0.5,
+                      child: ModalBarrier(dismissible: false, color: Colors.black),
+                    ),
+                    Center(
+                      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0B01A2))),
+                    ),
+                  ]),
+                ),
+          ),
+        ],
       ),
     );
   }

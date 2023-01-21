@@ -4,8 +4,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
-
+import '../controller/loading_controller.dart';
 import './leave.dart';
 import './dialogWidget.dart' as diawiget;
 import '../style.dart' as style;
@@ -32,6 +33,7 @@ class _LeaveUIState extends State<LeaveUI> {
   List<String> listViewAbsent = [];
   List<String> listViewTotal = [];
   late bool _leaveisLoading;
+  bool leaveEarlyBool = false;
 
   void _onRefresh() async{
     await Future.delayed(Duration(milliseconds: 500));
@@ -40,6 +42,7 @@ class _LeaveUIState extends State<LeaveUI> {
       final snapshot = await refGet.get();
       if (snapshot.exists) {
         setState(() {
+          leaveEarlyBool = false;
           itemTotalCount = 0;
           listViewAbsent.clear();
           listViewLeaveEarly.clear();
@@ -49,7 +52,7 @@ class _LeaveUIState extends State<LeaveUI> {
           for (String leaveEarlyA in fireListData.keys){
             if (leaveEarlyA != 'state'){
               if (fireListData[leaveEarlyA]['type'] == 'outing'){listViewOuting.add(leaveEarlyA); itemTotalCount++;}
-              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++;}
+              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++; leaveEarlyBool = true;}
               if (fireListData[leaveEarlyA]['type'] == 'absent'){listViewAbsent.add(leaveEarlyA); itemTotalCount++;}
             }
           }
@@ -76,6 +79,7 @@ class _LeaveUIState extends State<LeaveUI> {
       final snapshot = await refGet.get();
       if (snapshot.exists) {
         setState(() {
+          leaveEarlyBool = false;
           itemTotalCount = 0;
           listViewAbsent.clear();
           listViewLeaveEarly.clear();
@@ -85,7 +89,7 @@ class _LeaveUIState extends State<LeaveUI> {
           for (String leaveEarlyA in fireListData.keys){
             if (leaveEarlyA != 'state'){
               if (fireListData[leaveEarlyA]['type'] == 'outing'){listViewOuting.add(leaveEarlyA); itemTotalCount++;}
-              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++;}
+              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++; leaveEarlyBool = true;}
               if (fireListData[leaveEarlyA]['type'] == 'absent'){listViewAbsent.add(leaveEarlyA); itemTotalCount++;}
             }
           }
@@ -103,11 +107,13 @@ class _LeaveUIState extends State<LeaveUI> {
   }
 
   letterbackRefresh() async{
+    IsLoadingControllerleave.to.isLoading = true;
     try{
       final refGet = FirebaseDatabase.instance.ref().child('attendance/${fireDataSeat['place']}/${fireDataSeat['number']}');
       final snapshot = await refGet.get();
       if (snapshot.exists) {
         setState(() {
+          leaveEarlyBool = false;
           itemTotalCount = 0;
           listViewAbsent.clear();
           listViewLeaveEarly.clear();
@@ -117,7 +123,7 @@ class _LeaveUIState extends State<LeaveUI> {
           for (String leaveEarlyA in fireListData.keys){
             if (leaveEarlyA != 'state'){
               if (fireListData[leaveEarlyA]['type'] == 'outing'){listViewOuting.add(leaveEarlyA); itemTotalCount++;}
-              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++;}
+              if (fireListData[leaveEarlyA]['type'] == 'leaveEarly'){listViewLeaveEarly.add(leaveEarlyA); itemTotalCount++; leaveEarlyBool = true;}
               if (fireListData[leaveEarlyA]['type'] == 'absent'){listViewAbsent.add(leaveEarlyA); itemTotalCount++;}
             }
           }
@@ -125,9 +131,11 @@ class _LeaveUIState extends State<LeaveUI> {
           for (String aa in listViewOuting){listViewTotal.add(aa);}
           for (String aa in listViewAbsent){listViewTotal.add(aa);}
         });
+        IsLoadingControllerleave.to.isLoading = false;
       }
     }catch(e){
       diawiget.showSnackBar(context, '알수없는 오류');
+      IsLoadingControllerleave.to.isLoading = false;
     }
   }
 
@@ -142,25 +150,45 @@ class _LeaveUIState extends State<LeaveUI> {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(IsLoadingControllerleave());
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,title: Text('설정 목록'),
         actions: [
           IconButton(
-          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveAddUI(fireDataSeat : fireDataSeat) )).then((value) {letterbackRefresh();});},
+          onPressed: (){Navigator.push(context, CupertinoPageRoute(builder: (c) => LeaveAddUI(fireDataSeat : fireDataSeat, leaveEarlyBool : leaveEarlyBool) )).then((value) {letterbackRefresh();});},
           icon : Icon(Icons.add, color: Colors.white, size: 30),
         ),],
       ),
 
       body: _leaveisLoading ? const Center(child: SizedBox(width: 30,height: 30,child: CircularProgressIndicator(color: Color(0xff0B01A2),)),)
-          :SmartRefresher(
-        enablePullDown: true,
-        enablePullUp: false,
-        header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        child: itemTotalCount == 0 ? OALNoneData() : ListView.builder(itemBuilder: (c, i) => OALListData(countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewTotal : listViewTotal, onRefresh : _onRefresh), itemCount: itemTotalCount),
-      ),
+          :Stack(
+            children: [
+              SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: false,
+                header: WaterDropMaterialHeader(backgroundColor: Color(0xff0B01A2)),
+                controller: _refreshController,
+                onRefresh: _onRefresh,
+                child: itemTotalCount == 0 ? OALNoneData() : ListView.builder(itemBuilder: (c, i) => OALListData(countWidget : i,fireListData : fireListData, fireDataSeat : fireDataSeat, listViewTotal : listViewTotal, onRefresh : _onRefresh), itemCount: itemTotalCount),
+              ),
+              Obx(
+                    () => Offstage(
+                      offstage: !IsLoadingControllerleave.to.isLoading,
+                      child: Stack(children: const <Widget>[
+                        Opacity(
+                          opacity: 0.5,
+                          child: ModalBarrier(dismissible: false, color: Colors.black),
+                        ),
+                        Center(
+                          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0B01A2))),
+                        ),
+                      ]),
+                    ),
+              ),
+            ],
+          ),
+
     );
   }
 }
