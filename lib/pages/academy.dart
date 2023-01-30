@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
-import '../controller/loading_controller.dart';
 import './academyadd.dart';
 import './dialogWidget.dart' as diawiget;
 import '../style.dart' as style;

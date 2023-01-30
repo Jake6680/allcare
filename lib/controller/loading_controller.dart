@@ -10,6 +10,7 @@ class IsLoadingController extends GetxController {
   void setIsLoading(bool value) => _isLoading.value = value;
 }
 
+
 class IsLoadingControllerleave extends GetxController {
   static IsLoadingControllerleave get to => Get.find();
 
@@ -19,6 +20,7 @@ class IsLoadingControllerleave extends GetxController {
   set isLoading(bool value) => _isLoading.value = value;
   void setIsLoading(bool value) => _isLoading.value = value;
 }
+
 
 class IsLoadingControlleracademy extends GetxController {
   static IsLoadingControlleracademy get to => Get.find();
